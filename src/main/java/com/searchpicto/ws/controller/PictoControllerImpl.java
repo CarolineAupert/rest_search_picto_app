@@ -9,9 +9,17 @@ import com.searchpicto.ws.exception.PictoNotFoundException;
 import com.searchpicto.ws.model.Picto;
 import com.searchpicto.ws.service.PictoService;
 
+/**
+ * Implementation of {@link PictoController}.
+ * @author carol
+ *
+ */
 @RestController
 public class PictoControllerImpl implements PictoController {
 
+	/**
+	 * The Service associated to pictos.
+	 */
 	@Autowired
 	private PictoService pictoService;
 

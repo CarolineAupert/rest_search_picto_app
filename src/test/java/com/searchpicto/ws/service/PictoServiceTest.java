@@ -40,7 +40,7 @@ import com.searchpicto.ws.repository.TagRepository;
  */
 
 @ExtendWith(MockitoExtension.class)
-public class PictoServiceTest {
+class PictoServiceTest {
 
 	/**
 	 * The mock Tag Repository.
@@ -71,7 +71,7 @@ public class PictoServiceTest {
 		Picto picto = new Picto();
 		picto.setCreationDate(LocalDateTime.now());
 		picto.setMedia(new Media(location));
-		picto.setTags(tags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet()));
+		picto.setTags(tags.stream().map(Tag::new).collect(Collectors.toSet()));
 		return picto;
 	}
 
@@ -83,6 +83,7 @@ public class PictoServiceTest {
 		Long id = Long.valueOf(2);
 		Picto picto = initPicto("Parchemein.jpg",
 				Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet()));
+
 		Mockito.when(pictoRepositoryMock.findById(id)).thenReturn(Optional.of(picto));
 		assertEquals(Optional.of(picto), pictoService.getPictoById(id), "The Picto found is not the same.");
 	}
@@ -151,6 +152,7 @@ public class PictoServiceTest {
 	 */
 	@Test
 	void findPictosByTagName_knownTag_equals() {
+		// Initiating data
 		String tagName = "known";
 		Picto picto1 = initPicto("Loupe.jpg",
 				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
@@ -159,6 +161,8 @@ public class PictoServiceTest {
 		Set<Picto> pictos = Stream.of(picto1, picto2).collect(Collectors.toSet());
 		Tag foundTag = new Tag();
 		foundTag.setPictos(pictos);
+
+		// Testing
 		Mockito.when(tagRepositoryMock.findById(tagName)).thenReturn(Optional.of(foundTag));
 		assertEquals(pictos, pictoService.findPictosByTagName(tagName), "Pictos should match.");
 	}
@@ -253,7 +257,7 @@ public class PictoServiceTest {
 	 */
 	@Test
 	void addPictoTags_pictoTagsOk_add() {
-		// Initiating the picto
+		// Initiating picto
 		Picto initialPicto = new Picto();
 		Media media = new Media("parchemin.jpg");
 		initialPicto.setMedia(media);
@@ -264,11 +268,12 @@ public class PictoServiceTest {
 		// Initiating the tags to add
 		Set<String> tagNamesToAdd = Stream.of("legislation", "paperasse").collect(Collectors.toSet());
 
+		// Initiating data to verify
 		Picto newPicto = pictoService.addPictoTags(initialPicto, tagNamesToAdd);
-
 		Set<String> allTags = Stream.of("contrat", "loi", "signature", "legislation", "paperasse")
 				.collect(Collectors.toSet());
 
+		// Testing
 		assertEquals(allTags.size(), newPicto.getTags().size(), "The tags should have the same size.");
 		assertTrue(
 				allTags.containsAll(newPicto.getTags().stream().map(tag -> tag.getTagId()).collect(Collectors.toSet())),

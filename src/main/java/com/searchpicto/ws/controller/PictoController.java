@@ -7,11 +7,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.searchpicto.ws.model.Picto;
 
+/**
+ * Controller class for pictograms.
+ * 
+ * @author carol
+ *
+ */
 public interface PictoController {
 
+	/**
+	 * Retrieve all the pictos associated to a tag.
+	 * @param tag The tag searched.
+	 * @return The pictos associated.
+	 */
 	@GetMapping("/pictos")
 	public Set<Picto> findPictosByTag(@RequestParam(value = "tag") String tag);
 
+	/**
+	 * Retrieve a {@link Picto} from its id.
+	 * @param id The Picto id.
+	 * @return The picto wanted.
+	 */
 	@GetMapping("/picto")
 	public Picto getPictoById(@RequestParam(value = "id") Long id);
 

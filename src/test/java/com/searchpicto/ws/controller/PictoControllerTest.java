@@ -34,8 +34,9 @@ import com.searchpicto.ws.service.PictoServiceImpl;
  * @author carol
  *
  */
+@ActiveProfiles("test")
 @WebMvcTest(PictoController.class)
-public class PictoControllerTest {
+class PictoControllerTest {
 
 	/**
 	 * Mock MVC.
@@ -59,7 +60,7 @@ public class PictoControllerTest {
 	private Picto initPicto(String location, Set<String> tags) {
 		Picto picto = new Picto();
 		picto.setMedia(new Media(location));
-		picto.setTags(tags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet()));
+		picto.setTags(tags.stream().map(Tag::new).collect(Collectors.toSet()));
 		return picto;
 	}
 

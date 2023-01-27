@@ -14,12 +14,24 @@ import com.searchpicto.ws.model.Tag;
 import com.searchpicto.ws.repository.PictoRepository;
 import com.searchpicto.ws.repository.TagRepository;
 
+/**
+ * Implementation of {@link PictoService}.
+ * 
+ * @author carol
+ *
+ */
 @Service
 public class PictoServiceImpl implements PictoService {
 
+	/**
+	 * Tag repository.
+	 */
 	@Autowired
 	private TagRepository tagRepository;
 
+	/**
+	 * Picto Repository.
+	 */
 	@Autowired
 	private PictoRepository pictoRepository;
 
@@ -48,17 +60,15 @@ public class PictoServiceImpl implements PictoService {
 	@Override
 	public void addNewPicto(Picto picto) {
 		if (picto != null && picto.getTags() != null) {
-			for (Tag tag : picto.getTags()) {
-				tagRepository.save(tag);
-			}
+			picto.getTags().forEach(tag -> tagRepository.save(tag));
 			pictoRepository.save(picto);
 		}
 	}
 
 	@Override
 	public Picto addPictoTags(Picto picto, Set<String> newTags) {
-		if(picto != null && newTags!= null && !newTags.isEmpty()) {
-			Set<Tag> tagsToAdd = newTags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet());
+		if (picto != null && newTags != null && !newTags.isEmpty()) {
+			Set<Tag> tagsToAdd = newTags.stream().map(Tag::new).collect(Collectors.toSet());
 			picto.addTags(tagsToAdd);
 			this.addNewPicto(picto);
 		}

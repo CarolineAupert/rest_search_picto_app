@@ -12,14 +12,15 @@ import com.searchpicto.ws.model.Media;
  */
 @Service
 public interface MediaService {
-	
+
 	/**
 	 * Converts the image Media to a WebP.
+	 * 
 	 * @param media The {@link Media}to be converted.
 	 * @return The converted {@link Media}.
 	 */
 	public Media convertToWebP(Media media);
-	
+
 	/**
 	 * Check if the {@link Media}is compatible for being stored.
 	 * 
@@ -27,5 +28,5 @@ public interface MediaService {
 	 * @return True if the {@link Media}is ok, false otherwise.
 	 */
 	public boolean isImageCompatible(Media media);
-	
+
 }

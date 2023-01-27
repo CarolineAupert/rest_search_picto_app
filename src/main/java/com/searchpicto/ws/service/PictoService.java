@@ -17,16 +17,18 @@ import com.searchpicto.ws.model.Tag;
  */
 @Service
 public interface PictoService {
-	
+
 	/**
 	 * Retrieve all the {@link Picto} associated to a {@link Tag}.
+	 * 
 	 * @param tagName The {@link Tag} id/value
 	 * @return The {@link Set} of {@link Picto} associated.
 	 */
 	public Set<Picto> findPictosByTagName(String tagName);
-	
+
 	/**
 	 * Retrieve a Picto by its id.
+	 * 
 	 * @param id The {@link Picto} id
 	 * @return The {@link Picto}found.
 	 */
@@ -34,16 +36,18 @@ public interface PictoService {
 
 	/**
 	 * Add a new {@link Picto}.
+	 * 
 	 * @param picto The {@link Picto}to add.
 	 */
 	public void addNewPicto(Picto picto);
-	
+
 	/**
-	 * Add  {@link Tag} to a {@link Picto}.
-	 * @param picto The {@link Picto}to be updated.
+	 * Add {@link Tag} to a {@link Picto}.
+	 * 
+	 * @param picto   The {@link Picto}to be updated.
 	 * @param newTags The tag values to be added.
 	 * @return The {@link Picto}with th enew tags added.
 	 */
 	public Picto addPictoTags(Picto picto, Set<String> newTags);
-	
+
 }

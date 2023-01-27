@@ -147,10 +147,4 @@ public class Picto {
 		this.tags.addAll(tags);
 	}
 
-	@Override
-	public String toString() {
-		return "Picto : Id=" + pictoId + ", media=" + media.getLocation() + ", tags="
-				+ tags.stream().map(tag -> tag.getTagId()).toString() + ", creationDate=" + creationDate + "]";
-	}
-
 }

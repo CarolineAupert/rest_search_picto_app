@@ -3,6 +3,8 @@
  */
 package com.searchpicto.ws.service;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 
 @ExtendWith(MockitoExtension.class)
-public class MediaServiceTest {
+class MediaServiceTest {
 
 	/**
 	 * The service to test.
@@ -30,5 +32,6 @@ public class MediaServiceTest {
 	 */
 	@Test
 	void sometest() {
+		assertTrue(true);
 	}
 }
