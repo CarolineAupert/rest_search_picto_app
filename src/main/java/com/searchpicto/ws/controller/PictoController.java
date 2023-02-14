@@ -2,9 +2,11 @@ package com.searchpicto.ws.controller;
 
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.searchpicto.ws.dto.PictoDto;
 import com.searchpicto.ws.model.Picto;
 
 /**
@@ -20,8 +22,9 @@ public interface PictoController {
 	 * @param tag The tag searched.
 	 * @return The pictos associated.
 	 */
+	@CrossOrigin
 	@GetMapping("/pictos")
-	public Set<Picto> findPictosByTag(@RequestParam(value = "tag") String tag);
+	public Set<PictoDto> findPictosByTag(@RequestParam(value = "tag") String tag);
 
 	/**
 	 * Retrieve a {@link Picto} from its id.
@@ -29,6 +32,6 @@ public interface PictoController {
 	 * @return The picto wanted.
 	 */
 	@GetMapping("/picto")
-	public Picto getPictoById(@RequestParam(value = "id") Long id);
+	public PictoDto getPictoById(@RequestParam(value = "id") Long id);
 
 }

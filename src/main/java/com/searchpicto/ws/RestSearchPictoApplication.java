@@ -29,12 +29,12 @@ public class RestSearchPictoApplication {
 	private Environment environment;
 
 	@Bean
-	public CommandLineRunner demo(PictoService pictoService) {
+	CommandLineRunner demo(PictoService pictoService) {
 		return args -> {
 			if (!Arrays.asList(environment.getActiveProfiles()).contains("test")) {
-				pictoService.addNewPicto(initPicto("Loupe.jpg",
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Loupe.jpg",
 						Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet())));
-				pictoService.addNewPicto(initPicto("Parchemin.jpg",
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Parchemin.jpg",
 						Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet())));
 
 			}

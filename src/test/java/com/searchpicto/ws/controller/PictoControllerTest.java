@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -17,11 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.searchpicto.ws.dto.PictoDto;
 import com.searchpicto.ws.model.Media;
 import com.searchpicto.ws.model.Picto;
 import com.searchpicto.ws.model.Tag;
@@ -34,8 +37,9 @@ import com.searchpicto.ws.service.PictoServiceImpl;
  * @author carol
  *
  */
-@ActiveProfiles("test")
+
 @WebMvcTest(PictoController.class)
+@ComponentScan("com.searchpicto.ws.mapper")
 class PictoControllerTest {
 
 	/**
@@ -43,9 +47,9 @@ class PictoControllerTest {
 	 */
 	@Autowired
 	private MockMvc mockMvc;
-
+	
 	/**
-	 * Mock PictoService? 
+	 * Mock PictoService.
 	 */
 	@MockBean
 	private PictoServiceImpl pictoServiceMock;
@@ -57,10 +61,12 @@ class PictoControllerTest {
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 */
-	private Picto initPicto(String location, Set<String> tags) {
+	private Picto initPicto(Long id, String location, Set<String> tags, LocalDateTime creationDate) {
 		Picto picto = new Picto();
+		picto.setPictoId(id);
 		picto.setMedia(new Media(location));
 		picto.setTags(tags.stream().map(Tag::new).collect(Collectors.toSet()));
+		picto.setCreationDate(creationDate);
 		return picto;
 	}
 
@@ -69,13 +75,19 @@ class PictoControllerTest {
 	 */
 	@Test
 	void getPictoById_existingPicto_found() throws Exception {
+		// Init values
 		Long id = Long.valueOf(2);
-		Picto picto = initPicto("Parchemein.jpg",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()));
+		String location = "Parchemin.jpg";
+		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
+		Picto picto = initPicto(id,location,tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20));
+		PictoDto pictoExcepted = new PictoDto(id, location,tagsNames, "1990-06-04");
+		
+		// Mock
 		when(pictoServiceMock.getPictoById(id)).thenReturn(Optional.of(picto));
 
+		// Test
 		this.mockMvc.perform(get("/picto?id=" + id)).andDo(print()).andExpect(status().isOk())
-				.andExpect(content().json(getJson(picto), false));
+				.andExpect(content().json(getJson(pictoExcepted), false));
 	}
 
 	/**
@@ -95,14 +107,23 @@ class PictoControllerTest {
 	 */
 	@Test
 	void findPictosByTag_existingOnePicto_found() throws Exception {
-		Picto picto = initPicto("Parchemein.jpg",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()));
+		// Init values
+		Long id = Long.valueOf(2);
+		String location = "Parchemin.jpg";
+		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		Set<Picto> pictos = new HashSet<>();
-		pictos.add(picto);
+		pictos.add(initPicto(id,location,tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20)));
+		
+		Set<PictoDto> pictosExpected = new HashSet<>();
+		pictosExpected.add(new PictoDto(id, location,tagsNames, "1990-06-04"));
 
+
+		// Mock
 		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(pictos);
+		
+		//Test
 		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
-				.andExpect(content().json(getJson(pictos), false));
+				.andExpect(content().json(getJson(pictosExpected), false));
 	}
 
 	/**
@@ -110,17 +131,28 @@ class PictoControllerTest {
 	 */
 	@Test
 	void findPictosByTag_existingPictos_found() throws Exception {
-		Picto picto1 = initPicto("Parchemein.jpg",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()));
-		Picto picto2 = initPicto("Truc.jpg",
-				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()));
-		Set<Picto> pictos = new HashSet<>();
-		pictos.add(picto1);
-		pictos.add(picto2);
+		// Init values
+		Long id1 = Long.valueOf(2);
+		Long id2 = Long.valueOf(10);
+		String location1 = "Parchemin.jpg";
+		String location2 = "Truc.jpg";
+		Set<String> tagsNames1 = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
+		Set<String> tagsNames2 = Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet());
 
+		Set<Picto> pictos = new HashSet<>();
+		pictos.add(initPicto(id1,location1,tagsNames1, LocalDateTime.of(1990, 06, 04, 10, 20)));
+		pictos.add(initPicto(id2,location2,tagsNames2, LocalDateTime.of(1987, 05, 18, 10, 20)));
+		
+		Set<PictoDto> pictosExpected = new HashSet<>();
+		pictosExpected.add(new PictoDto(id1, location1,tagsNames1, "1990-06-04"));
+		pictosExpected.add(new PictoDto(id2, location2,tagsNames2, "1987-05-18"));
+
+		// Mock
 		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(pictos);
+		
+		// Test
 		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
-				.andExpect(content().json(getJson(pictos), false));
+				.andExpect(content().json(getJson(pictosExpected), false));
 	}
 
 	/**
@@ -128,8 +160,8 @@ class PictoControllerTest {
 	 */
 	@Test
 	void findPictosByTag_noPicto_404() throws Exception {
-		Picto picto = initPicto("Parchemein.jpg",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()));
+		Picto picto = initPicto(Long.valueOf(20),"Parchemein.jpg",
+				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()), LocalDateTime.now());
 		Set<Picto> pictos = new HashSet<>();
 		pictos.add(picto);
 

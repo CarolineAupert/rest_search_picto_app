@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.searchpicto.ws.model;
 
 import java.time.LocalDateTime;
