@@ -1,5 +1,6 @@
 package com.searchpicto.ws.controller;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,8 +37,8 @@ public class PictoControllerImpl implements PictoController {
 	@Override
 	public Set<PictoDto> findPictosByTag(String tag) {
 		Set<Picto> pictos = pictoService.findPictosByTagName(tag);
-		if(pictos == null || pictos.isEmpty()) {
-			throw new PictoNotFoundException(tag);
+		if(pictos == null) {
+			pictos = new HashSet<>();
 		}
 		return pictos.stream().map(pictoMapper::pictoToPictoDto).collect(Collectors.toSet());
 	}

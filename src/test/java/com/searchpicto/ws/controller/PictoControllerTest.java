@@ -159,15 +159,15 @@ class PictoControllerTest {
 	 * Tests findPictosByTag method when no picto found.
 	 */
 	@Test
-	void findPictosByTag_noPicto_404() throws Exception {
+	void findPictosByTag_noPicto_empty() throws Exception {
 		Picto picto = initPicto(Long.valueOf(20),"Parchemein.jpg",
 				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()), LocalDateTime.now());
 		Set<Picto> pictos = new HashSet<>();
 		pictos.add(picto);
 
 		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(new HashSet<>());
-		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().string(containsString("Could not find picto for the tag : contrat")));
+		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().json(getJson(new HashSet<>()), false));
 	}
 
 	/**
