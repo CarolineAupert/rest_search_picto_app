@@ -16,6 +16,10 @@ import org.springframework.core.style.ToStringCreator;
  * @author carol
  *
  */
+/**
+ * @author carol
+ *
+ */
 public class PictoDto {
 
 	/**
@@ -39,6 +43,12 @@ public class PictoDto {
 	private String creationDate;
 	
 	
+	/**
+	 * The media title. 
+	 */
+	private String title;
+	
+	
 
 	/**
 	 * Empty constructor.
@@ -54,12 +64,32 @@ public class PictoDto {
 	 * @param tags Tags names,
 	 * @param creationDate Creation Date.
 	 */
-	public PictoDto(Long pictoId, String location, Set<String> tags, String creationDate) {
+	public PictoDto(Long pictoId, String location, Set<String> tags, String creationDate, String title) {
 		super();
 		this.pictoId = pictoId;
 		this.location = location;
 		this.tags = tags;
 		this.creationDate = creationDate;
+		this.title = title;
+	}
+
+	
+	/**
+	 * title getter.
+	 *
+	 * @return the title.
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * title setter.
+	 *
+	 * @param title : the title to set.
+	 */
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	/**
@@ -139,6 +169,7 @@ public class PictoDto {
 		return new ToStringCreator(this)
 		        .append("pictoId", this.getPictoId())
 		        .append("location", this.getLocation())
+		        .append("title", this.getTitle())
 		        .append("creationDate", this.getCreationDate())
 		        .append("tags", this.getTags())
 		        .toString();

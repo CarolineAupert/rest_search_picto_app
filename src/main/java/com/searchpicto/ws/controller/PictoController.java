@@ -2,7 +2,6 @@ package com.searchpicto.ws.controller;
 
 import java.util.Set;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -22,8 +21,6 @@ public interface PictoController {
 	 * @param tag The tag searched.
 	 * @return The pictos associated.
 	 */
-	// CrossOrigin used for local tests, will be removed soon
-	@CrossOrigin
 	@GetMapping("/pictos")
 	public Set<PictoDto> findPictosByTag(@RequestParam(value = "tag") String tag);
 

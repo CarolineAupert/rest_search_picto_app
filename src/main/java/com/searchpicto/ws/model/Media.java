@@ -19,6 +19,10 @@ import jakarta.persistence.Transient;
  * @author carol
  *
  */
+/**
+ * @author carol
+ *
+ */
 @Entity
 @Table(name="MEDIAS")
 public class Media {
@@ -58,6 +62,12 @@ public class Media {
 	private MediaType type;
 	
 	/**
+	 * The media title
+	 */
+	@Column(nullable=false)
+	private String title;
+	
+	/**
 	 * Default constructor.
 	 */
 	public Media() {
@@ -67,12 +77,32 @@ public class Media {
 	/**
 	 * Constructor with an image only.
 	 * @param location The image location.
+	 * @param title The image title.
 	 */
-	public Media(String location) {
+	public Media(String location, String title) {
 		super();
 		this.location = location;
+		this.title = title;
 	}
 	
+	/**
+	 * title getter.
+	 *
+	 * @return the title.
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * title setter.
+	 *
+	 * @param title : the title to set.
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 	/**
 	 * mediaId getter.
 	 *
