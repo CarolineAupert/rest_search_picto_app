@@ -47,7 +47,7 @@ class PictoControllerTest {
 	 */
 	@Autowired
 	private MockMvc mockMvc;
-	
+
 	/**
 	 * Mock PictoService.
 	 */
@@ -57,14 +57,16 @@ class PictoControllerTest {
 	/**
 	 * Method to init a Picto with Tags.
 	 * 
+	 * @param id       The Picto id.
 	 * @param location The Media location.
+	 * @param title    The Media title.
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 */
-	private Picto initPicto(Long id, String location, Set<String> tags, LocalDateTime creationDate) {
+	private Picto initPicto(Long id, String location, String title, Set<String> tags, LocalDateTime creationDate) {
 		Picto picto = new Picto();
 		picto.setPictoId(id);
-		picto.setMedia(new Media(location));
+		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(Tag::new).collect(Collectors.toSet()));
 		picto.setCreationDate(creationDate);
 		return picto;
@@ -78,10 +80,11 @@ class PictoControllerTest {
 		// Init values
 		Long id = Long.valueOf(2);
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
-		Picto picto = initPicto(id,location,tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20));
-		PictoDto pictoExcepted = new PictoDto(id, location,tagsNames, "1990-06-04");
-		
+		Picto picto = initPicto(id, location, title, tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20));
+		PictoDto pictoExcepted = new PictoDto(id, location, tagsNames, "1990-06-04", title);
+
 		// Mock
 		when(pictoServiceMock.getPictoById(id)).thenReturn(Optional.of(picto));
 
@@ -110,18 +113,18 @@ class PictoControllerTest {
 		// Init values
 		Long id = Long.valueOf(2);
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		Set<Picto> pictos = new HashSet<>();
-		pictos.add(initPicto(id,location,tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20)));
-		
-		Set<PictoDto> pictosExpected = new HashSet<>();
-		pictosExpected.add(new PictoDto(id, location,tagsNames, "1990-06-04"));
+		pictos.add(initPicto(id, location, title, tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20)));
 
+		Set<PictoDto> pictosExpected = new HashSet<>();
+		pictosExpected.add(new PictoDto(id, location, tagsNames, "1990-06-04", title));
 
 		// Mock
 		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(pictos);
-		
-		//Test
+
+		// Test
 		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(getJson(pictosExpected), false));
 	}
@@ -135,21 +138,23 @@ class PictoControllerTest {
 		Long id1 = Long.valueOf(2);
 		Long id2 = Long.valueOf(10);
 		String location1 = "Parchemin.jpg";
+		String title1 = "Un parchemin";
+		String title2 = "Un truc";
 		String location2 = "Truc.jpg";
 		Set<String> tagsNames1 = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		Set<String> tagsNames2 = Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet());
 
 		Set<Picto> pictos = new HashSet<>();
-		pictos.add(initPicto(id1,location1,tagsNames1, LocalDateTime.of(1990, 06, 04, 10, 20)));
-		pictos.add(initPicto(id2,location2,tagsNames2, LocalDateTime.of(1987, 05, 18, 10, 20)));
-		
+		pictos.add(initPicto(id1, location1, title1, tagsNames1, LocalDateTime.of(1990, 06, 04, 10, 20)));
+		pictos.add(initPicto(id2, location2, title2, tagsNames2, LocalDateTime.of(1987, 05, 18, 10, 20)));
+
 		Set<PictoDto> pictosExpected = new HashSet<>();
-		pictosExpected.add(new PictoDto(id1, location1,tagsNames1, "1990-06-04"));
-		pictosExpected.add(new PictoDto(id2, location2,tagsNames2, "1987-05-18"));
+		pictosExpected.add(new PictoDto(id1, location1, tagsNames1, "1990-06-04", title1));
+		pictosExpected.add(new PictoDto(id2, location2, tagsNames2, "1987-05-18", title2));
 
 		// Mock
 		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(pictos);
-		
+
 		// Test
 		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(getJson(pictosExpected), false));
@@ -160,8 +165,9 @@ class PictoControllerTest {
 	 */
 	@Test
 	void findPictosByTag_noPicto_empty() throws Exception {
-		Picto picto = initPicto(Long.valueOf(20),"Parchemein.jpg",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()), LocalDateTime.now());
+		Picto picto = initPicto(Long.valueOf(20), "Parchemein.jpg", "Un parchemin",
+				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()),
+				LocalDateTime.now());
 		Set<Picto> pictos = new HashSet<>();
 		pictos.add(picto);
 
@@ -175,7 +181,8 @@ class PictoControllerTest {
 	 * 
 	 * @param object The object.
 	 * @return The json generated.
-	 * @throws JsonProcessingException The exception thrown when a parsing problem occurs.
+	 * @throws JsonProcessingException The exception thrown when a parsing problem
+	 *                                 occurs.
 	 */
 	private String getJson(Object object) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();

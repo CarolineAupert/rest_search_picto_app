@@ -39,34 +39,36 @@ class RestSearchPictoApplicationTests {
 
 	@Autowired
 	private MockMvc mockMvc;
-	
+
 	@Autowired
 	private PictoService pictoService;
-	
+
 	/**
 	 * Method to init a Picto with Tags.
 	 * 
 	 * @param location The Media location.
+	 * @param title    The Media title.
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 */
-	private Picto initPicto( String location, Set<String> tags) {
+	private Picto initPicto(String location, String title, Set<String> tags) {
 		Picto picto = new Picto();
-		picto.setMedia(new Media(location));
+		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet()));
 		pictoService.addNewPicto(picto);
 		return picto;
-	}	
-	
+	}
+
 	/**
 	 * Init database for tests
-	 * @throws JsonProcessingException 
+	 * 
+	 * @throws JsonProcessingException
 	 */
 	@BeforeAll
 	void initData() throws JsonProcessingException {
-		initPicto("Parchemin.jpg",
+		initPicto("Parchemin.jpg", "Un parchemin",
 				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()));
-		initPicto("Truc.jpg",
+		initPicto("Truc.jpg", "Un truc",
 				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()));
 	}
 
@@ -106,17 +108,18 @@ class RestSearchPictoApplicationTests {
 	void findPictosByTag_existingPictos_found() throws Exception {
 
 		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
-				.andExpect(content().string(containsString("Parchemin.jpg"))).andExpect(content().string(containsString("Truc.jpg")));
+				.andExpect(content().string(containsString("Parchemin.jpg")))
+				.andExpect(content().string(containsString("Truc.jpg")));
 	}
 
 	/**
 	 * Tests findPictosByTag method when no picto found.
 	 */
 	@Test
-	void findPictosByTag_noPicto_404() throws Exception {
+	void findPictosByTag_noPicto_empty() throws Exception {
 
-		this.mockMvc.perform(get("/pictos?tag=truc")).andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().string(containsString("Could not find picto for the tag : truc")));
+		this.mockMvc.perform(get("/pictos?tag=truc")).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString("")));
 	}
 
 }
