@@ -64,13 +64,14 @@ class PictoServiceTest {
 	 * Method to init a Picto with Tags.
 	 * 
 	 * @param location The Media location.
+	 * @param title The Media title.
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 */
-	private Picto initPicto(String location, Set<String> tags) {
+	private Picto initPicto(String location, String title, Set<String> tags) {
 		Picto picto = new Picto();
 		picto.setCreationDate(LocalDateTime.now());
-		picto.setMedia(new Media(location));
+		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(Tag::new).collect(Collectors.toSet()));
 		return picto;
 	}
@@ -81,7 +82,7 @@ class PictoServiceTest {
 	@Test
 	void getPictoById_pictoReturned_equals() {
 		Long id = Long.valueOf(2);
-		Picto picto = initPicto("Parchemein.jpg",
+		Picto picto = initPicto("Parchemein.jpg","Un parchemin",
 				Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet()));
 
 		Mockito.when(pictoRepositoryMock.findById(id)).thenReturn(Optional.of(picto));
@@ -154,9 +155,9 @@ class PictoServiceTest {
 	void findPictosByTagName_knownTag_equals() {
 		// Initiating data
 		String tagName = "known";
-		Picto picto1 = initPicto("Loupe.jpg",
+		Picto picto1 = initPicto("Loupe.jpg","Une loupe",
 				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
-		Picto picto2 = initPicto("Parchemein.jpg",
+		Picto picto2 = initPicto("Parchemein.jpg","Un parchemin",
 				Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet()));
 		Set<Picto> pictos = Stream.of(picto1, picto2).collect(Collectors.toSet());
 		Tag foundTag = new Tag();
@@ -203,7 +204,7 @@ class PictoServiceTest {
 	 */
 	@Test
 	void addNewPicto_pictoWithTags_save() {
-		Picto picto = initPicto("Loupe.jpg",
+		Picto picto = initPicto("Loupe.jpg","Une loupe",
 				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
 		pictoService.addNewPicto(picto);
 
@@ -259,7 +260,7 @@ class PictoServiceTest {
 	void addPictoTags_pictoTagsOk_add() {
 		// Initiating picto
 		Picto initialPicto = new Picto();
-		Media media = new Media("parchemin.jpg");
+		Media media = new Media("parchemin.jpg","Un parchemin");
 		initialPicto.setMedia(media);
 		Set<Tag> existingTags = Stream.of(new Tag("contrat"), new Tag("loi"), new Tag("signature"))
 				.collect(Collectors.toSet());

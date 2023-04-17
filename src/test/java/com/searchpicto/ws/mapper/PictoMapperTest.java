@@ -31,14 +31,16 @@ class PictoMapperTest {
 	/**
 	 * Method to init a Picto with Tags.
 	 * 
+	 * @param id       The Picto id.
 	 * @param location The Media location.
+	 * @param title    The Media title.
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 */
-	private Picto initPicto(Long id, String location, Set<String> tags, LocalDateTime date) {
+	private Picto initPicto(Long id, String location, String title, Set<String> tags, LocalDateTime date) {
 		Picto picto = new Picto();
 		picto.setPictoId(id);
-		picto.setMedia(new Media(location));
+		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(Tag::new).collect(Collectors.toSet()));
 		picto.setCreationDate(date);
 		return picto;
@@ -52,15 +54,16 @@ class PictoMapperTest {
 		// Values
 		Long pictoId = Long.valueOf(5);
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		LocalDateTime creationDate = LocalDateTime.of(1990, 06, 04, 10, 12);
 
 		// Test
-		Picto pictoToConvert = initPicto(pictoId, location, tagsNames, creationDate);
-		PictoDto pictoConverted = new PictoDto(pictoId, location, tagsNames, "1990-06-04");
+		Picto pictoToConvert = initPicto(pictoId, location, title, tagsNames, creationDate);
+		PictoDto pictoConverted = new PictoDto(pictoId, location, tagsNames, "1990-06-04", title);
 		assertEquals(mapper.pictoToPictoDto(pictoToConvert), pictoConverted);
 	}
-	
+
 	/**
 	 * Tests pictoToPictoDto when the Picto does not have a Media.
 	 */
@@ -69,16 +72,17 @@ class PictoMapperTest {
 		// Values
 		Long pictoId = Long.valueOf(5);
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		LocalDateTime creationDate = LocalDateTime.of(1990, 06, 04, 10, 12);
 
 		// Test
-		Picto pictoToConvert = initPicto(pictoId, location, tagsNames, creationDate);
+		Picto pictoToConvert = initPicto(pictoId, location, title, tagsNames, creationDate);
 		pictoToConvert.setMedia(null);
-		PictoDto pictoConverted = new PictoDto(pictoId, null, tagsNames, "1990-06-04");
+		PictoDto pictoConverted = new PictoDto(pictoId, null, tagsNames, "1990-06-04", null);
 		assertEquals(mapper.pictoToPictoDto(pictoToConvert), pictoConverted);
 	}
-	
+
 	/**
 	 * Tests pictoToPictoDto when the Picto does not have a creation date.
 	 */
@@ -87,14 +91,15 @@ class PictoMapperTest {
 		// Values
 		Long pictoId = Long.valueOf(5);
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 
 		// Test
-		Picto pictoToConvert = initPicto(pictoId, location, tagsNames, null);
-		PictoDto pictoConverted = new PictoDto(pictoId, location, tagsNames, null);
+		Picto pictoToConvert = initPicto(pictoId, location, title, tagsNames, null);
+		PictoDto pictoConverted = new PictoDto(pictoId, location, tagsNames, null, title);
 		assertEquals(mapper.pictoToPictoDto(pictoToConvert), pictoConverted);
 	}
-	
+
 	/**
 	 * Tests pictoToPictoDto when the Picto does not have tags.
 	 */
@@ -103,16 +108,17 @@ class PictoMapperTest {
 		// Values
 		Long pictoId = Long.valueOf(5);
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		LocalDateTime creationDate = LocalDateTime.of(1990, 06, 04, 10, 12);
 
 		// Test
-		Picto pictoToConvert = initPicto(pictoId, location, tagsNames, creationDate);
+		Picto pictoToConvert = initPicto(pictoId, location, title, tagsNames, creationDate);
 		pictoToConvert.setTags(null);
-		PictoDto pictoConverted = new PictoDto(pictoId, location, new HashSet<>(), "1990-06-04");
+		PictoDto pictoConverted = new PictoDto(pictoId, location, new HashSet<>(), "1990-06-04", title);
 		assertEquals(mapper.pictoToPictoDto(pictoToConvert), pictoConverted);
 	}
-	
+
 	/**
 	 * Tests pictoToPictoDto when the Picto does not have a creation date nor an id.
 	 */
@@ -121,14 +127,15 @@ class PictoMapperTest {
 		// Values
 		Long pictoId = null;
 		String location = "Parchemin.jpg";
+		String title = "Un parchemin";
 		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 
 		// Test
-		Picto pictoToConvert = initPicto(pictoId, location, tagsNames, null);
-		PictoDto pictoConverted = new PictoDto(pictoId, location, tagsNames, null);
+		Picto pictoToConvert = initPicto(pictoId, location, title, tagsNames, null);
+		PictoDto pictoConverted = new PictoDto(pictoId, location, tagsNames, null, title);
 		assertEquals(mapper.pictoToPictoDto(pictoToConvert), pictoConverted);
 	}
-	
+
 	/**
 	 * Tests pictoToPictoDto when the Picto is null..
 	 */

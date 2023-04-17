@@ -25,28 +25,22 @@ public class PictoMapperImpl implements PictoMapper {
 	@Override
 	public PictoDto pictoToPictoDto(Picto picto) {
 		PictoDto pictoTarget = new PictoDto();
-		if(picto != null) {
+		if (picto != null) {
+
 			pictoTarget.setPictoId(picto.getPictoId());
-			pictoTarget.setLocation(getLocation(picto.getMedia()));
 			pictoTarget.setCreationDate(getCreationDateFormatted(picto.getCreationDate()));
 			pictoTarget.setTags(getTagsNames(picto.getTags()));
+
+			Media media = picto.getMedia();
+			if (media != null) {
+				pictoTarget.setLocation(media.getLocation());
+				pictoTarget.setTitle(media.getTitle());
+			}
 		}
 		return pictoTarget;
 	}
-	
 
-	/**
-	 * Retrieve the location of a Media.
-	 * @param media : the media from which to get the location.
-	 * @return The location.
-	 */
-	private String getLocation(Media media) {
-		if (media != null) {
-			return media.getLocation();
-		}
-		return null;
-	}
-	
+
 	/**
 	 * Convert a {@link LocalDateTime} to a String "YYY-MM-DD".
 	 * 
@@ -59,7 +53,7 @@ public class PictoMapperImpl implements PictoMapper {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Retrieve the tags names from a {@link Set}of {@link Tag}.
 	 *
@@ -67,7 +61,7 @@ public class PictoMapperImpl implements PictoMapper {
 	 * @return The tags names.
 	 */
 	public Set<String> getTagsNames(Set<Tag> tags) {
-		if(tags != null) {
+		if (tags != null) {
 			return tags.stream().map(Tag::getTagId).collect(Collectors.toSet());
 		}
 		return new HashSet<>();
