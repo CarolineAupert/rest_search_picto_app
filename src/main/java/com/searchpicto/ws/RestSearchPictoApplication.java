@@ -33,18 +33,20 @@ public class RestSearchPictoApplication {
 	@Bean
 	CommandLineRunner demo(PictoService pictoService) {
 		return args -> {
-			pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Loupe.jpg","Une loupe",
-					Stream.of("loupe", "détail", "chercher", "analyser", "zoom", "picto").collect(Collectors.toSet())));
-			pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Parchemin.jpg","Un parchemin",
-					Stream.of("parchemin", "détail", "contrat", "législation", "picto").collect(Collectors.toSet())));
-			pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Travail-ordi.jpg","Un perso avec son ordi",
-					Stream.of("ordinateur", "travail", "télétravail", "heureux", "picto", "perso").collect(Collectors.toSet())));
-			pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Tirelire.jpg","Une tirelire cochon",
-					Stream.of("tirelire", "cochon", "argent", "picto").collect(Collectors.toSet())));
-			pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Surf-plante.jpg","Une feuille pour planche de surf",
-					Stream.of("surf", "écologie", "plante", "picto", "perso").collect(Collectors.toSet())));
-			pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Questionnement.jpg","Une question",
-					Stream.of("question", "perso", "picto", "réfléchir").collect(Collectors.toSet())));
+			if (!Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Loupe.jpg","Une loupe",
+						Stream.of("loupe", "détail", "chercher", "analyser", "zoom", "picto").collect(Collectors.toSet())));
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Parchemin.jpg","Un parchemin",
+						Stream.of("parchemin", "détail", "contrat", "législation", "picto").collect(Collectors.toSet())));
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Travail-ordi.jpg","Un perso avec son ordi",
+						Stream.of("ordinateur", "travail", "télétravail", "heureux", "picto", "perso").collect(Collectors.toSet())));
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Tirelire.jpg","Une tirelire cochon",
+						Stream.of("tirelire", "cochon", "argent", "picto").collect(Collectors.toSet())));
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Surf-plante.jpg","Une feuille pour planche de surf",
+						Stream.of("surf", "écologie", "plante", "picto", "perso").collect(Collectors.toSet())));
+				pictoService.addNewPicto(initPicto("https://caukaro.fr/wp-content/uploads/2023/02/Questionnement.jpg","Une question",
+						Stream.of("question", "perso", "picto", "réfléchir").collect(Collectors.toSet())));
+			}
 		};
 	}
 
