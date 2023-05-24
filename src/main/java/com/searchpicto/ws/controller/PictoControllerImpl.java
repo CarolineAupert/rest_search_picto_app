@@ -1,6 +1,8 @@
 package com.searchpicto.ws.controller;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ import com.searchpicto.ws.service.PictoService;
 
 /**
  * Implementation of {@link PictoController}.
+ * 
  * @author carol
  *
  */
@@ -27,7 +30,7 @@ public class PictoControllerImpl implements PictoController {
 	 */
 	@Autowired
 	private PictoService pictoService;
-	
+
 	/**
 	 * The model mapper.
 	 */
@@ -36,21 +39,30 @@ public class PictoControllerImpl implements PictoController {
 
 	@Override
 	public Set<PictoDto> findPictosByTag(String tag) {
-		Set<Picto> pictos = pictoService.findPictosByTagName(tag);
-		if(pictos == null) {
+		var pictos = pictoService.findPictosByTagName(tag);
+		if (pictos == null) {
 			pictos = new HashSet<>();
 		}
 		return pictos.stream().map(pictoMapper::pictoToPictoDto).collect(Collectors.toSet());
 	}
 
-
 	@Override
 	public PictoDto getPictoById(Long id) {
 		Optional<Picto> picto = pictoService.getPictoById(id);
-		if(picto.isPresent()) {
+		if (picto.isPresent()) {
 			return pictoMapper.pictoToPictoDto(picto.get());
 		} else {
 			throw new PictoNotFoundException(id);
 		}
+	}
+
+	@Override
+	public List<PictoDto> getLastPictosAdded(int sizeLimit) {
+		var pictos = pictoService.getLastPictosAdded(sizeLimit);
+		if (pictos == null) {
+			pictos = new ArrayList<>();
+		}
+		return pictos.stream().map(pictoMapper::pictoToPictoDto).collect(Collectors.toList());
+
 	}
 }

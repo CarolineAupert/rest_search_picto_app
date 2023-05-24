@@ -1,12 +1,17 @@
 package com.searchpicto.ws.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.searchpicto.ws.model.Picto;
@@ -73,6 +78,18 @@ public class PictoServiceImpl implements PictoService {
 			this.addNewPicto(picto);
 		}
 		return picto;
+	}
+
+	@Override
+	public List<Picto> getLastPictosAdded(int sizeLimit) {
+		if (sizeLimit > 0) {
+			Page<Picto> pictosPage = pictoRepository
+					.findAll(PageRequest.of(0, sizeLimit, Sort.by(Sort.Direction.DESC, "creationDate")));
+			if (pictosPage != null) {
+				return pictosPage.getContent();
+			}
+		}
+		return new ArrayList<>();
 	}
 
 }

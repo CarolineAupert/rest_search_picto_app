@@ -14,6 +14,6 @@ import com.searchpicto.ws.model.Picto;
 @Component
 public interface PictoMapper {
 	
-	public PictoDto pictoToPictoDto(Picto picto);
+	PictoDto pictoToPictoDto(Picto picto);
 
 }
