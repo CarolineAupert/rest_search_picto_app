@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -73,6 +74,72 @@ class PictoControllerTest {
 	}
 
 	/**
+	 * Tests getLastPictosAdded method when pictos are found.
+	 */
+	@Test
+	void getLastPictosAdded_pictos_found() throws Exception {
+		// Init values
+		int sizeLimit = 10;
+		Long id1 = Long.valueOf(2);
+		Long id2 = Long.valueOf(10);
+		String location1 = "Parchemin.jpg";
+		String title1 = "Un parchemin";
+		String title2 = "Un truc";
+		String location2 = "Truc.jpg";
+		var tagsNames1 = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
+		var tagsNames2 = Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet());
+
+		var pictos = new ArrayList<Picto>();
+		pictos.add(initPicto(id1, location1, title1, tagsNames1, LocalDateTime.of(1990, 06, 04, 10, 20)));
+		pictos.add(initPicto(id2, location2, title2, tagsNames2, LocalDateTime.of(1987, 05, 18, 10, 20)));
+
+		var pictosExpected = new ArrayList<PictoDto>();
+		pictosExpected.add(new PictoDto(id1, location1, tagsNames1, "1990-06-04", title1));
+		pictosExpected.add(new PictoDto(id2, location2, tagsNames2, "1987-05-18", title2));
+
+		// Mock
+		when(pictoServiceMock.getLastPictosAdded(sizeLimit)).thenReturn(pictos);
+
+		// Test
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().json(getJson(pictosExpected), false));
+	}
+
+	/**
+	 * Tests getLastPictosAdded method when no pictos are found.
+	 */
+	@Test
+	void getLastPictosAdded_pictos_none() throws Exception {
+		// Init values
+		int sizeLimit = 10;
+		var pictosExpected = new ArrayList<PictoDto>();
+
+		// Mock
+		when(pictoServiceMock.getLastPictosAdded(sizeLimit)).thenReturn(new ArrayList<Picto>());
+
+		// Test
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().json(getJson(pictosExpected), false));
+	}
+
+	/**
+	 * Tests getLastPictosAdded method when null a given by the service.
+	 */
+	@Test
+	void getLastPictosAdded_pictos_null() throws Exception {
+		// Init values
+		int sizeLimit = 10;
+		var pictosExpected = new ArrayList<PictoDto>();
+
+		// Mock
+		when(pictoServiceMock.getLastPictosAdded(sizeLimit)).thenReturn(null);
+
+		// Test
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().json(getJson(pictosExpected), false));
+	}
+
+	/**
 	 * Tests getPictoById method when a picto is found.
 	 */
 	@Test
@@ -81,7 +148,7 @@ class PictoControllerTest {
 		Long id = Long.valueOf(2);
 		String location = "Parchemin.jpg";
 		String title = "Un parchemin";
-		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
+		var tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		Picto picto = initPicto(id, location, title, tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20));
 		PictoDto pictoExcepted = new PictoDto(id, location, tagsNames, "1990-06-04", title);
 
@@ -114,11 +181,11 @@ class PictoControllerTest {
 		Long id = Long.valueOf(2);
 		String location = "Parchemin.jpg";
 		String title = "Un parchemin";
-		Set<String> tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
-		Set<Picto> pictos = new HashSet<>();
+		var tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
+		var pictos = new HashSet<Picto>();
 		pictos.add(initPicto(id, location, title, tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20)));
 
-		Set<PictoDto> pictosExpected = new HashSet<>();
+		var pictosExpected = new HashSet<PictoDto>();
 		pictosExpected.add(new PictoDto(id, location, tagsNames, "1990-06-04", title));
 
 		// Mock
@@ -141,14 +208,14 @@ class PictoControllerTest {
 		String title1 = "Un parchemin";
 		String title2 = "Un truc";
 		String location2 = "Truc.jpg";
-		Set<String> tagsNames1 = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
-		Set<String> tagsNames2 = Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet());
+		var tagsNames1 = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
+		var tagsNames2 = Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet());
 
-		Set<Picto> pictos = new HashSet<>();
+		var pictos = new HashSet<Picto>();
 		pictos.add(initPicto(id1, location1, title1, tagsNames1, LocalDateTime.of(1990, 06, 04, 10, 20)));
 		pictos.add(initPicto(id2, location2, title2, tagsNames2, LocalDateTime.of(1987, 05, 18, 10, 20)));
 
-		Set<PictoDto> pictosExpected = new HashSet<>();
+		var pictosExpected = new HashSet<PictoDto>();
 		pictosExpected.add(new PictoDto(id1, location1, tagsNames1, "1990-06-04", title1));
 		pictosExpected.add(new PictoDto(id2, location2, tagsNames2, "1987-05-18", title2));
 
@@ -168,7 +235,7 @@ class PictoControllerTest {
 		Picto picto = initPicto(Long.valueOf(20), "Parchemein.jpg", "Un parchemin",
 				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()),
 				LocalDateTime.now());
-		Set<Picto> pictos = new HashSet<>();
+		var pictos = new HashSet<Picto>();
 		pictos.add(picto);
 
 		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(new HashSet<>());

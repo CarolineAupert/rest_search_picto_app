@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,10 +52,11 @@ class RestSearchPictoApplicationTests {
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 */
-	private Picto initPicto(String location, String title, Set<String> tags) {
+	private Picto initPicto(String location, String title, Set<String> tags, LocalDateTime creationDate) {
 		Picto picto = new Picto();
 		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet()));
+		picto.setCreationDate(creationDate);
 		pictoService.addNewPicto(picto);
 		return picto;
 	}
@@ -67,9 +69,17 @@ class RestSearchPictoApplicationTests {
 	@BeforeAll
 	void initData() throws JsonProcessingException {
 		initPicto("Parchemin.jpg", "Un parchemin",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()));
+				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()),
+				LocalDateTime.of(2023, 05, 24, 18, 00));
 		initPicto("Truc.jpg", "Un truc",
-				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()));
+				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()),
+				LocalDateTime.of(2023, 04, 24, 18, 10));
+		initPicto("Picto.jpg", "Un truc",
+				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()),
+				LocalDateTime.of(2023, 05, 22, 18, 20));
+		initPicto("Perso.jpg", "Un truc",
+				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()),
+				LocalDateTime.of(2023, 05, 24, 17, 50));
 	}
 
 	/**
@@ -122,4 +132,52 @@ class RestSearchPictoApplicationTests {
 				.andExpect(content().string(containsString("")));
 	}
 
+	/**
+	 * Tests getLastPictosAdded method when no pictos are found.
+	 */
+	@Test
+	void getLastPictosAdded_noPictos_empty() throws Exception {
+		Integer sizeLimit = Integer.valueOf(10);
+
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString("")));
+	}
+
+	/**
+	 * Tests getLastPictosAdded method retrieving the 2 last pictos.
+	 */
+	@Test
+	void getLastPictosAdded_limitTo2_success() throws Exception {
+		Integer sizeLimit = Integer.valueOf(2);
+
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString("Parchemin.jpg")))
+				.andExpect(content().string(containsString("Perso.jpg")));
+	}
+
+	/**
+	 * Tests getLastPictosAdded method retrieving the 5 last pictos.
+	 */
+	@Test
+	void getLastPictosAdded_limitTo5_success() throws Exception {
+		Integer sizeLimit = Integer.valueOf(5);
+
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString("Parchemin.jpg")))
+				.andExpect(content().string(containsString("Truc.jpg")))
+				.andExpect(content().string(containsString("Picto.jpg")))
+				.andExpect(content().string(containsString("Perso.jpg")));
+	}
+
+	
+	/**
+	 * Tests getLastPictosAdded method retrieving the 0 last pictos.
+	 */
+	@Test
+	void getLastPictosAdded_limitTo0_success() throws Exception {
+		Integer sizeLimit = Integer.valueOf(0);
+
+		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
+		.andExpect(content().string(containsString("")));
+	}
 }

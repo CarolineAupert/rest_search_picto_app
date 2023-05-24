@@ -19,7 +19,7 @@ public interface MediaService {
 	 * @param media The {@link Media}to be converted.
 	 * @return The converted {@link Media}.
 	 */
-	public Media convertToWebP(Media media);
+	Media convertToWebP(Media media);
 
 	/**
 	 * Check if the {@link Media}is compatible for being stored.
@@ -27,6 +27,6 @@ public interface MediaService {
 	 * @param media The {@link Media} to be checked.
 	 * @return True if the {@link Media}is ok, false otherwise.
 	 */
-	public boolean isImageCompatible(Media media);
+	boolean isImageCompatible(Media media);
 
 }
