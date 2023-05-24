@@ -1,5 +1,6 @@
 package com.searchpicto.ws.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ public interface PictoService {
 	 * @param tagName The {@link Tag} id/value
 	 * @return The {@link Set} of {@link Picto} associated.
 	 */
-	public Set<Picto> findPictosByTagName(String tagName);
+	Set<Picto> findPictosByTagName(String tagName);
 
 	/**
 	 * Retrieve a Picto by its id.
@@ -32,14 +33,14 @@ public interface PictoService {
 	 * @param id The {@link Picto} id
 	 * @return The {@link Picto}found.
 	 */
-	public Optional<Picto> getPictoById(Long id);
+	Optional<Picto> getPictoById(Long id);
 
 	/**
 	 * Add a new {@link Picto}.
 	 * 
 	 * @param picto The {@link Picto}to add.
 	 */
-	public void addNewPicto(Picto picto);
+	void addNewPicto(Picto picto);
 
 	/**
 	 * Add {@link Tag} to a {@link Picto}.
@@ -48,6 +49,13 @@ public interface PictoService {
 	 * @param newTags The tag values to be added.
 	 * @return The {@link Picto}with th enew tags added.
 	 */
-	public Picto addPictoTags(Picto picto, Set<String> newTags);
+	Picto addPictoTags(Picto picto, Set<String> newTags);
+	
+	/**
+	 * Retrieves the n last pictos added in the database.
+	 * @param sizeLimit The number of pictos wanted.
+	 * @return The n pictos.
+	 */
+	List<Picto> getLastPictosAdded(int sizeLimit);
 
 }
