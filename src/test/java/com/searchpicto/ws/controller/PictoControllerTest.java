@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.searchpicto.ws.dto.PictoDto;
+import com.searchpicto.ws.exception.PictoIndexingException;
 import com.searchpicto.ws.model.Media;
 import com.searchpicto.ws.model.Picto;
 import com.searchpicto.ws.model.Tag;
@@ -54,6 +56,20 @@ class PictoControllerTest {
 	 */
 	@MockBean
 	private PictoServiceImpl pictoServiceMock;
+	
+	/**
+	 * Generate JSON from an object.
+	 * 
+	 * @param object The object.
+	 * @return The json generated.
+	 * @throws JsonProcessingException The exception thrown when a parsing problem
+	 *                                 occurs.
+	 */
+	private String getJson(Object object) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		return mapper.writeValueAsString(object);
+	}
 
 	/**
 	 * Method to init a Picto with Tags.
@@ -173,34 +189,34 @@ class PictoControllerTest {
 	}
 
 	/**
-	 * Tests findPictosByTag method when one picto is found.
+	 * Tests findPictosByQuery method when one picto is found.
 	 */
 	@Test
-	void findPictosByTag_existingOnePicto_found() throws Exception {
+	void findPictosByQuery_existingOnePicto_found() throws Exception {
 		// Init values
 		Long id = Long.valueOf(2);
 		String location = "Parchemin.jpg";
 		String title = "Un parchemin";
 		var tagsNames = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
-		var pictos = new HashSet<Picto>();
+		var pictos = new ArrayList<Picto>();
 		pictos.add(initPicto(id, location, title, tagsNames, LocalDateTime.of(1990, 06, 04, 10, 20)));
 
-		var pictosExpected = new HashSet<PictoDto>();
+		var pictosExpected = new ArrayList<PictoDto>();
 		pictosExpected.add(new PictoDto(id, location, tagsNames, "1990-06-04", title));
 
 		// Mock
-		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(pictos);
+		when(pictoServiceMock.findPictosByQuery("contrat")).thenReturn(pictos);
 
 		// Test
-		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
+		this.mockMvc.perform(get("/pictos?query=contrat")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(getJson(pictosExpected), false));
 	}
 
 	/**
-	 * Tests findPictosByTag method when pictos are found.
+	 * Tests findPictosByQuery method when pictos are found.
 	 */
 	@Test
-	void findPictosByTag_existingPictos_found() throws Exception {
+	void findPictosByQuery_existingPictos_found() throws Exception {
 		// Init values
 		Long id1 = Long.valueOf(2);
 		Long id2 = Long.valueOf(10);
@@ -211,49 +227,46 @@ class PictoControllerTest {
 		var tagsNames1 = Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet());
 		var tagsNames2 = Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet());
 
-		var pictos = new HashSet<Picto>();
+		var pictos = new ArrayList<Picto>();
 		pictos.add(initPicto(id1, location1, title1, tagsNames1, LocalDateTime.of(1990, 06, 04, 10, 20)));
 		pictos.add(initPicto(id2, location2, title2, tagsNames2, LocalDateTime.of(1987, 05, 18, 10, 20)));
 
-		var pictosExpected = new HashSet<PictoDto>();
+		var pictosExpected = new ArrayList<PictoDto>();
 		pictosExpected.add(new PictoDto(id1, location1, tagsNames1, "1990-06-04", title1));
 		pictosExpected.add(new PictoDto(id2, location2, tagsNames2, "1987-05-18", title2));
 
 		// Mock
-		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(pictos);
+		when(pictoServiceMock.findPictosByQuery("contrat loi")).thenReturn(pictos);
 
 		// Test
-		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
+		this.mockMvc.perform(get("/pictos?query=contrat loi")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(getJson(pictosExpected), false));
 	}
 
 	/**
-	 * Tests findPictosByTag method when no picto found.
+	 * Tests findPictosByQuery method when no picto found.
 	 */
 	@Test
-	void findPictosByTag_noPicto_empty() throws Exception {
+	void findPictosByQuery_noPicto_empty() throws Exception {
 		Picto picto = initPicto(Long.valueOf(20), "Parchemein.jpg", "Un parchemin",
 				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()),
 				LocalDateTime.now());
-		var pictos = new HashSet<Picto>();
+		var pictos = new ArrayList<Picto>();
 		pictos.add(picto);
 
-		when(pictoServiceMock.findPictosByTagName("contrat")).thenReturn(new HashSet<>());
-		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
+		when(pictoServiceMock.findPictosByQuery("contrat")).thenReturn(new ArrayList<>());
+		this.mockMvc.perform(get("/pictos?query=contrat")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().json(getJson(new HashSet<>()), false));
 	}
-
+	
 	/**
-	 * Generate JSON from an object.
-	 * 
-	 * @param object The object.
-	 * @return The json generated.
-	 * @throws JsonProcessingException The exception thrown when a parsing problem
-	 *                                 occurs.
+	 * Tests findPictosByQuery method when the indexer throws an Exception.
 	 */
-	private String getJson(Object object) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		return mapper.writeValueAsString(object);
+	@Test
+	void findPictosByQuery_indexerException() throws Exception {
+		
+		when(pictoServiceMock.findPictosByQuery("contrat")).thenThrow(new PictoIndexingException("contrat", new IOException()));
+		this.mockMvc.perform(get("/pictos?query=contrat")).andDo(print()).andExpect(status().isInternalServerError())
+		.andExpect(content().string(containsString("Error while looking for the picto with the query : contrat")));
 	}
 }

@@ -6,11 +6,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -20,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.searchpicto.ws.model.Media;
 import com.searchpicto.ws.model.Picto;
 import com.searchpicto.ws.model.Tag;
@@ -51,8 +54,10 @@ class RestSearchPictoApplicationTests {
 	 * @param title    The Media title.
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
+	 * @throws IOException
 	 */
-	private Picto initPicto(String location, String title, Set<String> tags, LocalDateTime creationDate) {
+	private Picto initPicto(String location, String title, Set<String> tags, LocalDateTime creationDate)
+			throws IOException {
 		Picto picto = new Picto();
 		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet()));
@@ -64,22 +69,33 @@ class RestSearchPictoApplicationTests {
 	/**
 	 * Init database for tests
 	 * 
-	 * @throws JsonProcessingException
+	 * @throws IOException
 	 */
 	@BeforeAll
-	void initData() throws JsonProcessingException {
+	void initData() throws IOException {
 		initPicto("Parchemin.jpg", "Un parchemin",
-				Stream.of("parchemin", "detail", "contrat", "legislation").collect(Collectors.toSet()),
+				Stream.of("parchemin", "détail", "contrat", "legislation", "machin").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 05, 24, 18, 00));
 		initPicto("Truc.jpg", "Un truc",
-				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()),
+				Stream.of("encore", "allo", "Contrat", "Machines").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 04, 24, 18, 10));
 		initPicto("Picto.jpg", "Un truc",
-				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()),
+				Stream.of("encore", "allo", "contrats", "une législation").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 05, 22, 18, 20));
 		initPicto("Perso.jpg", "Un truc",
-				Stream.of("encore", "allo", "contrat", "legislation").collect(Collectors.toSet()),
+				Stream.of("encore", "allo", "contrat", "legislation", "j'analyse").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 05, 24, 17, 50));
+
+	}
+
+	/**
+	 * Delete the file index at the end of the tests.
+	 * 
+	 * @throws IOException The exception.
+	 */
+	@AfterAll
+	void deleteIndex() throws IOException {
+		FileUtils.deleteDirectory(new File("src/test/resources/lucene/index"));
 	}
 
 	/**
@@ -103,11 +119,11 @@ class RestSearchPictoApplicationTests {
 	}
 
 	/**
-	 * Tests findPictosByTag method when one picto is found.
+	 * Tests findPictosByQuery method when one picto is found.
 	 */
 	@Test
-	void findPictosByTag_existingOnePicto_found() throws Exception {
-		this.mockMvc.perform(get("/pictos?tag=parchemin")).andDo(print()).andExpect(status().isOk())
+	void findPictosByQuery_existingOnePicto_found() throws Exception {
+		this.mockMvc.perform(get("/pictos?query=parchemin")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(containsString("Parchemin.jpg")));
 	}
 
@@ -115,20 +131,32 @@ class RestSearchPictoApplicationTests {
 	 * Tests findPictosByTag method when pictos are found.
 	 */
 	@Test
-	void findPictosByTag_existingPictos_found() throws Exception {
+	void findPictosByQuery_existingPictos_found() throws Exception {
 
-		this.mockMvc.perform(get("/pictos?tag=contrat")).andDo(print()).andExpect(status().isOk())
+		this.mockMvc.perform(get("/pictos?query=machin")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(containsString("Parchemin.jpg")))
 				.andExpect(content().string(containsString("Truc.jpg")));
 	}
+	
+	/**
+	 * Tests findPictosByTag method when pictos are found with a complex query.
+	 */
+	@Test
+	void findPictosByQuery_existingPictos_complexQuery_found() throws Exception {
 
+		this.mockMvc.perform(get("/pictos?query=l'analyse de la législation")).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString("Parchemin.jpg")))
+				.andExpect(content().string(containsString("Picto.jpg")))
+				.andExpect(content().string(containsString("Perso.jpg")));
+	}
+	
 	/**
 	 * Tests findPictosByTag method when no picto found.
 	 */
 	@Test
-	void findPictosByTag_noPicto_empty() throws Exception {
+	void findPictosByQuery_noPicto_empty() throws Exception {
 
-		this.mockMvc.perform(get("/pictos?tag=truc")).andDo(print()).andExpect(status().isOk())
+		this.mockMvc.perform(get("/pictos?query=truc")).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(containsString("")));
 	}
 
@@ -169,7 +197,6 @@ class RestSearchPictoApplicationTests {
 				.andExpect(content().string(containsString("Perso.jpg")));
 	}
 
-	
 	/**
 	 * Tests getLastPictosAdded method retrieving the 0 last pictos.
 	 */
@@ -178,6 +205,6 @@ class RestSearchPictoApplicationTests {
 		Integer sizeLimit = Integer.valueOf(0);
 
 		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
-		.andExpect(content().string(containsString("")));
+				.andExpect(content().string(containsString("")));
 	}
 }
