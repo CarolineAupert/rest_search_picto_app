@@ -62,8 +62,7 @@ public abstract class LuceneIndexer<T> {
 	 * @throws IOException The exception thrown if the is a problem accessing index.
 	 */
 	protected void indexDocuments(List<Document> documents) throws IOException {
-		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
-		IndexWriter writer = new IndexWriter(getIndexDirectory(), indexWriterConfig);
+		IndexWriter writer = initIndexWriter();
 		for (var doc : documents) {
 			writer.addDocument(doc);
 		}
@@ -75,14 +74,24 @@ public abstract class LuceneIndexer<T> {
 	 * Update a document index.
 	 * @param term The term of the document to update.
 	 * @param document The document to update.
-	 * @throws IOException he exception thrown if the is a problem accessing index.
+	 * @throws IOException The exception thrown if the is a problem accessing index.
 	 */
 	protected void updateDocument(Term term, Document document) throws IOException {
-		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
-		IndexWriter writer = new IndexWriter(getIndexDirectory(), indexWriterConfig);
+		IndexWriter writer = initIndexWriter();
 		writer.updateDocument(term, document);
 		writer.close();
 		
+	}
+	
+	
+	/**
+	 * Initializes the IndexWriter.
+	 * @return The IndexWriter;
+	 * @throws IOException  The exception thrown if the is a problem accessing index.
+	 */
+	private IndexWriter initIndexWriter() throws IOException {
+		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
+		return new IndexWriter(getIndexDirectory(), indexWriterConfig);
 	}
 
 	/**

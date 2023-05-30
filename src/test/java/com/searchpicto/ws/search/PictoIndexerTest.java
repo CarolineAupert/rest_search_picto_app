@@ -22,12 +22,12 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexNotFoundException;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.FileSystemUtils;
 
 import com.searchpicto.ws.model.Media;
 import com.searchpicto.ws.model.Picto;
@@ -41,20 +41,9 @@ public class PictoIndexerTest {
 	 * 
 	 * @throws IOException The exception.
 	 */
-	@BeforeEach
-	void deleteIndexBeforeTest() throws IOException {
-		FileUtils.deleteDirectory(new File("./src/test/resources/luceneok/index"));
-	}
-
-	/**
-	 * Delete the file index after each test.
-	 * 
-	 * @throws IOException The exception.
-	 */
 	@AfterEach
 	void deleteIndexAfterTest() throws IOException {
-		FileUtils.deleteDirectory(new File("./src/test/resources/luceneok/index"));
-		System.out.println("Working Directory = " + System.getProperty("user.dir"));
+		FileSystemUtils.deleteRecursively(new File("./src/test/resources/luceneok/index"));
 	}
 
 	/**
@@ -340,7 +329,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_nullId() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk", OpenMode.CREATE);
 		Picto picto = initPicto(null, "Loupe.jpg", "Une loupe", new HashSet<>());
 		pictoIndexer.indexObject(picto);
 
@@ -357,7 +346,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_nullPicto() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk", OpenMode.CREATE);
 		pictoIndexer.indexObject(null);
 
 		List<Document> docs = pictoIndexer.search("contrat", PictoIndexer.FIELD_QUERY, 12);
