@@ -24,6 +24,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,9 +41,20 @@ public class PictoIndexerTest {
 	 * 
 	 * @throws IOException The exception.
 	 */
-	@AfterEach
-	void deleteIndex() throws IOException {
+	@BeforeEach
+	void deleteIndexBeforeTest() throws IOException {
 		FileUtils.deleteDirectory(new File("./src/test/resources/luceneok/index"));
+	}
+
+	/**
+	 * Delete the file index after each test.
+	 * 
+	 * @throws IOException The exception.
+	 */
+	@AfterEach
+	void deleteIndexAfterTest() throws IOException {
+		FileUtils.deleteDirectory(new File("./src/test/resources/luceneok/index"));
+		System.out.println("Working Directory = " + System.getProperty("user.dir"));
 	}
 
 	/**
