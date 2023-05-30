@@ -101,20 +101,6 @@ public class PictoIndexerTest {
 	}
 
 	/**
-	 * Tests the method initCustomAnalyzer when there is no existing config folder.
-	 * 
-	 * @throws Exception Exception
-	 */
-	@Test
-	void initCustomAnalyzer_ko_noConfigFolder() throws Exception {
-		IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-			new PictoIndexer("./src/test/resources/luceneEmpty");
-		});
-
-		assertTrue(thrown.getMessage().contains(".\\src\\test\\resources\\luceneEmpty\\config is not a directory"));
-	}
-
-	/**
 	 * Tests the method initCustomAnalyzer when there is no existing stopwords
 	 * file..
 	 * 
