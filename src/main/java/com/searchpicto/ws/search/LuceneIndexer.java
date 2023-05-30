@@ -11,6 +11,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -200,5 +201,19 @@ public abstract class LuceneIndexer<T> {
 	 * @throws IOException The exception thrown if the is a problem accessing path.
 	 */
 	protected abstract Analyzer initCustomAnalyzer() throws IOException;
+	
+	/**
+	 * Clean the index.
+	 * @throws IOException The exception thrown if the is a problem accessing path.
+	 */
+	protected void deleteIndex() throws IOException {
+
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
+            indexWriterConfig.setOpenMode(OpenMode.CREATE);
+            IndexWriter indexWriter  = new IndexWriter(getIndexDirectory(), indexWriterConfig);
+            indexWriter.deleteAll();
+            indexWriter.close();
+
+	}
 
 }
