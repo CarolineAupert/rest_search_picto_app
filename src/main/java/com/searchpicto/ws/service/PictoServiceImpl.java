@@ -1,23 +1,27 @@
 package com.searchpicto.ws.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.searchpicto.ws.exception.PictoIndexingException;
 import com.searchpicto.ws.model.Picto;
 import com.searchpicto.ws.model.Tag;
 import com.searchpicto.ws.repository.PictoRepository;
 import com.searchpicto.ws.repository.TagRepository;
+import com.searchpicto.ws.search.PictoIndexer;
 
 /**
  * Implementation of {@link PictoService}.
@@ -40,6 +44,12 @@ public class PictoServiceImpl implements PictoService {
 	@Autowired
 	private PictoRepository pictoRepository;
 
+	/**
+	 * The Picto indexer.
+	 */
+	@Autowired
+	private PictoIndexer pictoIndexer;
+
 	@Override
 	public Optional<Picto> getPictoById(Long id) {
 		Optional<Picto> picto = Optional.empty();
@@ -50,32 +60,54 @@ public class PictoServiceImpl implements PictoService {
 	}
 
 	@Override
-	public Set<Picto> findPictosByTagName(String tagName) {
-		Set<Picto> pictos = new HashSet<>();
-		if (tagName != null && StringUtils.isNotEmpty(tagName) && StringUtils.isNotBlank(tagName)) {
-			Optional<Tag> tag = tagRepository.findById(tagName);
-
-			if (tag.isPresent()) {
-				pictos = tag.get().getPictos();
+	public List<Picto> findPictosByQuery(String query) throws PictoIndexingException {
+		var pictos = new ArrayList<Picto>();
+		if (query != null && StringUtils.isNotEmpty(query) && StringUtils.isNotBlank(query)) {
+			try {
+				// See to make it pageable when the number of picto increases much ?
+				List<Document> docs = pictoIndexer.search(query, PictoIndexer.FIELD_QUERY, PictoIndexer.HITS);
+				if (docs != null && !docs.isEmpty()) {
+					for (Document doc : docs) {
+						Long pictoID = Long.valueOf(doc.get(PictoIndexer.FIELD_ID));
+						Optional<Picto> picto = pictoRepository.findById(pictoID);
+						if (picto.isPresent()) {
+							pictos.add(picto.get());
+						}
+					}
+				}
+			} catch (IOException | ParseException e) {
+				throw new PictoIndexingException(query, e);
+				// TODO add log
 			}
+
 		}
 		return pictos;
 	}
 
 	@Override
-	public void addNewPicto(Picto picto) {
+	public void addNewPicto(Picto picto) throws IOException {
 		if (picto != null && picto.getTags() != null) {
 			picto.getTags().forEach(tag -> tagRepository.save(tag));
 			pictoRepository.save(picto);
+			pictoIndexer.indexObject(picto);
 		}
 	}
 
 	@Override
-	public Picto addPictoTags(Picto picto, Set<String> newTags) {
+	public Picto addPictoTags(Picto picto, Set<String> newTags) throws IOException {
+		// See if this is in one session.
 		if (picto != null && newTags != null && !newTags.isEmpty()) {
+			// Save tags
 			Set<Tag> tagsToAdd = newTags.stream().map(Tag::new).collect(Collectors.toSet());
+			tagsToAdd.forEach(tag -> tagRepository.save(tag));
+
+			// Save picto
 			picto.addTags(tagsToAdd);
-			this.addNewPicto(picto);
+			pictoRepository.save(picto);
+
+			// TODO : si exception alors le logger pour pouvoir s'en occuper plus tard !
+			// Update index
+			pictoIndexer.updateObjectIndex(picto);
 		}
 		return picto;
 	}

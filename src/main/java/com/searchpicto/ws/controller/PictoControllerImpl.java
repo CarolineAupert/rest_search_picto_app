@@ -1,16 +1,15 @@
 package com.searchpicto.ws.controller;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.searchpicto.ws.dto.PictoDto;
+import com.searchpicto.ws.exception.PictoIndexingException;
 import com.searchpicto.ws.exception.PictoNotFoundException;
 import com.searchpicto.ws.mapper.PictoMapper;
 import com.searchpicto.ws.model.Picto;
@@ -38,12 +37,12 @@ public class PictoControllerImpl implements PictoController {
 	private PictoMapper pictoMapper;
 
 	@Override
-	public Set<PictoDto> findPictosByTag(String tag) {
-		var pictos = pictoService.findPictosByTagName(tag);
+	public List<PictoDto> findPictosByQuery(String query) throws PictoIndexingException {
+		var pictos = pictoService.findPictosByQuery(query);
 		if (pictos == null) {
-			pictos = new HashSet<>();
+			pictos = new ArrayList<>();
 		}
-		return pictos.stream().map(pictoMapper::pictoToPictoDto).collect(Collectors.toSet());
+		return pictos.stream().map(pictoMapper::pictoToPictoDto).collect(Collectors.toList());
 	}
 
 	@Override
