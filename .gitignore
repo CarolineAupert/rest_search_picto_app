@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 .mvn
 src/main/resources/application.properties
+src/test/resources/luceneOk/index/
 
 ### STS ###
 .apt_generated
