@@ -22,7 +22,6 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexNotFoundException;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +42,18 @@ public class PictoIndexerTest {
 	 */
 	@AfterEach
 	void deleteIndexAfterTest() throws IOException {
-		FileSystemUtils.deleteRecursively(new File("./src/test/resources/luceneok/index"));
+//		FileSystemUtils.deleteRecursively(new File("./src/test/resources/luceneok/index"));
+		deleteDirectory(new File("./src/test/resources/luceneok/index"));
+	}
+	
+	boolean deleteDirectory(File directoryToBeDeleted) {
+	    File[] allContents = directoryToBeDeleted.listFiles();
+	    if (allContents != null) {
+	        for (File file : allContents) {
+	            deleteDirectory(file);
+	        }
+	    }
+	    return directoryToBeDeleted.delete();
 	}
 
 	/**
