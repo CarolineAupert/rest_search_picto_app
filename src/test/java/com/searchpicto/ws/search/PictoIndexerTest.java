@@ -329,7 +329,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_nullId() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk", OpenMode.CREATE);
+		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
 		Picto picto = initPicto(null, "Loupe.jpg", "Une loupe", new HashSet<>());
 		pictoIndexer.indexObject(picto);
 
@@ -346,7 +346,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_nullPicto() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk", OpenMode.CREATE);
+		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
 		pictoIndexer.indexObject(null);
 
 		List<Document> docs = pictoIndexer.search("contrat", PictoIndexer.FIELD_QUERY, 12);
