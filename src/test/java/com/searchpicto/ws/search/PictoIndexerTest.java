@@ -42,7 +42,7 @@ public class PictoIndexerTest {
 	 */
 	@AfterEach
 	void deleteIndex() throws IOException {
-		FileUtils.deleteDirectory(new File("src/test/resources/luceneok/index"));
+		FileUtils.deleteDirectory(new File("./src/test/resources/luceneok/index"));
 	}
 
 	/**
