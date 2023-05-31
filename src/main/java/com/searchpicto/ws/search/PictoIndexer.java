@@ -15,10 +15,12 @@ import org.apache.lucene.analysis.fr.FrenchLightStemFilterFactory;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
 import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.apache.lucene.analysis.util.ElisionFilterFactory;
+import org.apache.lucene.analysis.util.FilesystemResourceLoader;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.util.ResourceLoader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -113,11 +115,11 @@ public class PictoIndexer extends LuceneIndexer<Picto> {
 
 	@Override
 	protected Analyzer initCustomAnalyzer() throws IOException {
-		return CustomAnalyzer.builder(Paths.get(getConfigDirectory())).withTokenizer(StandardTokenizerFactory.NAME)
+		return CustomAnalyzer.builder().withTokenizer(StandardTokenizerFactory.NAME)
 				.addTokenFilter(ElisionFilterFactory.NAME).addTokenFilter(FrenchLightStemFilterFactory.NAME)
 				.addTokenFilter(LowerCaseFilterFactory.NAME).addTokenFilter(ASCIIFoldingFilterFactory.NAME)
-				.addTokenFilter(StopFilterFactory.NAME, "ignoreCase", "false", "words", "stopwords.txt", "format",
-						"snowball")
+//				.addTokenFilter(StopFilterFactory.NAME, "ignoreCase", "false", "words", "stopwords.txt", "format",
+//						"snowball")
 				.build();
 	}
 
