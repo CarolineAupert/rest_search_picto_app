@@ -1,6 +1,5 @@
 package com.searchpicto.ws.service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,19 +42,21 @@ public interface PictoService {
 	 * Add a new {@link Picto}.
 	 * 
 	 * @param picto The {@link Picto}to add.
-	 * @throws IOException The exception thrown if the indexing goes wrong.
+	 * @throws PictoIndexingException The exception thrown if the indexing goes
+	 *                                wrong.
 	 */
-	void addNewPicto(Picto picto) throws IOException ;
+	void addNewPicto(Picto picto) throws PictoIndexingException;
 
 	/**
 	 * Add {@link Tag} to a {@link Picto}.
 	 * 
 	 * @param picto   The {@link Picto}to be updated.
 	 * @param newTags The tag values to be added.
-	 * @throws IOException The exception thrown if the indexing goes wrong.
+	 * @throws PictoIndexingException The exception thrown if the indexing goes
+	 *                                wrong.
 	 * @return The {@link Picto}with th enew tags added.
 	 */
-	Picto addPictoTags(Picto picto, Set<String> newTags) throws IOException ;
+	Picto addPictoTags(Picto picto, Set<String> newTags) throws PictoIndexingException;
 
 	/**
 	 * Retrieves the n last pictos added in the database.

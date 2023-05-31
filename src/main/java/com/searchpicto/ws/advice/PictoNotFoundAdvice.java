@@ -20,6 +20,7 @@ import com.searchpicto.ws.exception.PictoNotFoundException;
  */
 @ControllerAdvice
 public class PictoNotFoundAdvice {
+	
 
 	/**
 	 * The handler when a {@link PictoNotFoundException} is thrown.
