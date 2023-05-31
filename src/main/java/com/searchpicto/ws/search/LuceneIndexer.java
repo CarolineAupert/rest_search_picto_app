@@ -181,7 +181,7 @@ public abstract class LuceneIndexer<T> {
 	 * @throws IOException The exception thrown if the is a problem accessing path.
 	 */
 	protected Directory getIndexDirectory() throws IOException {
-		String indexDirectory = luceneDirectory + "/index";
+		String indexDirectory = luceneDirectory + "/index/";
 		return FSDirectory.open(Paths.get(indexDirectory));
 	}
 
@@ -192,7 +192,7 @@ public abstract class LuceneIndexer<T> {
 	 * @throws IOException The exception thrown if the is a problem accessing path.
 	 */
 	protected String getConfigDirectory() throws IOException {
-		return luceneDirectory + "/config";
+		return luceneDirectory + "/config/";
 	}
 
 	/**
