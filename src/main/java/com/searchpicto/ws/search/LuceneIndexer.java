@@ -22,6 +22,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,20 +40,20 @@ public abstract class LuceneIndexer<T> {
 	 * The custom analyzer.
 	 */
 	private Analyzer customAnalyzer;
+
 	/**
 	 * The lucene directory where to store indexes and config.
 	 */
+	@Value("${lucene.directory}")
 	private String luceneDirectory;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param luceneDirectory The lucene directory to initalize.
 	 * @throws IOException Execption thown if the analyzer cannot find the config
 	 *                     files.
 	 */
-	public LuceneIndexer(String luceneDirectory) throws IOException {
-		this.luceneDirectory = luceneDirectory;
+	public LuceneIndexer() {
 		this.customAnalyzer = initCustomAnalyzer();
 	}
 
@@ -69,11 +70,11 @@ public abstract class LuceneIndexer<T> {
 		}
 		writer.close();
 	}
-	
 
 	/**
 	 * Update a document index.
-	 * @param term The term of the document to update.
+	 * 
+	 * @param term     The term of the document to update.
 	 * @param document The document to update.
 	 * @throws IOException The exception thrown if the is a problem accessing index.
 	 */
@@ -81,14 +82,14 @@ public abstract class LuceneIndexer<T> {
 		IndexWriter writer = initIndexWriter();
 		writer.updateDocument(term, document);
 		writer.close();
-		
+
 	}
-	
-	
+
 	/**
 	 * Initializes the IndexWriter.
+	 * 
 	 * @return The IndexWriter;
-	 * @throws IOException  The exception thrown if the is a problem accessing index.
+	 * @throws IOException The exception thrown if the is a problem accessing index.
 	 */
 	private IndexWriter initIndexWriter() throws IOException {
 		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
@@ -139,7 +140,7 @@ public abstract class LuceneIndexer<T> {
 	 * @throws IOException The exception thrown if the is a problem accessing index.
 	 */
 	public abstract void indexObject(T object) throws IOException;
-	
+
 	/**
 	 * Update the index of an object.
 	 * 
@@ -186,34 +187,35 @@ public abstract class LuceneIndexer<T> {
 	}
 
 	/**
-	 * Config directory getter.
-	 * 
-	 * @return The directory.
-	 * @throws IOException The exception thrown if the is a problem accessing path.
-	 */
-	protected String getConfigDirectory() throws IOException {
-		return luceneDirectory + "/config/";
-	}
-
-	/**
 	 * Initializes the analyzer.
 	 *
-	 * @throws IOException The exception thrown if the is a problem accessing path.
 	 */
-	protected abstract Analyzer initCustomAnalyzer() throws IOException;
-	
+	protected abstract Analyzer initCustomAnalyzer();
+
 	/**
 	 * Clean the index.
+	 * 
 	 * @throws IOException The exception thrown if the is a problem accessing path.
 	 */
 	protected void deleteIndex() throws IOException {
 
-            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
-            indexWriterConfig.setOpenMode(OpenMode.CREATE);
-            IndexWriter indexWriter  = new IndexWriter(getIndexDirectory(), indexWriterConfig);
-            indexWriter.deleteAll();
-            indexWriter.close();
+		IndexWriterConfig indexWriterConfig = new IndexWriterConfig(getAnalyzer());
+		indexWriterConfig.setOpenMode(OpenMode.CREATE);
+		IndexWriter indexWriter = new IndexWriter(getIndexDirectory(), indexWriterConfig);
+		indexWriter.deleteAll();
+		indexWriter.close();
 
 	}
+
+	/**
+	 * luceneDirectory setter.
+	 *
+	 * @param luceneDirectory : the luceneDirectory to set.
+	 */
+	protected void setLuceneDirectory(String luceneDirectory) {
+		this.luceneDirectory = luceneDirectory;
+	}
+	
+	
 
 }

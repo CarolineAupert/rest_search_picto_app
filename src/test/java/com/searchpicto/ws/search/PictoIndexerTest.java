@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +30,6 @@ import com.searchpicto.ws.model.Tag;
 
 @ExtendWith(MockitoExtension.class)
 public class PictoIndexerTest {
-
 
 	/**
 	 * Analyzes a text.
@@ -90,7 +88,7 @@ public class PictoIndexerTest {
 	 */
 	@Test
 	void initCustomAnalyzer_ok_FrenchLightStemFilterFactory() throws Exception {
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 
 		Analyzer pictoAnalyzer = pictoIndexer.getAnalyzer();
 
@@ -99,21 +97,6 @@ public class PictoIndexerTest {
 		assertTrue(result.containsAll(Arrays.asList("test", "analys", "lucen", "aprenant", "tre")),
 				"It should contain the same words.");
 	}
-
-//	/**
-//	 * Tests the method initCustomAnalyzer when there is no existing stopwords
-//	 * file..
-//	 * 
-//	 * @throws Exception Exception
-//	 */
-//	@Test
-//	void initCustomAnalyzer_ko_noStopWordsFile() throws Exception {
-//		IOException thrown = assertThrows(IOException.class, () -> {
-//			new PictoIndexer("./src/test/resources/luceneNoStopWordsFile");
-//		});
-//
-//		assertTrue(thrown.getMessage().contains("Resource not found"));
-//	}
 
 	/**
 	 * Tests the method createDocument with a Picto with several tags.
@@ -125,7 +108,7 @@ public class PictoIndexerTest {
 		Picto picto = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
 
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		// We don't want to test the analyzer for this test
 		pictoIndexer.setAnalyzer(new StandardAnalyzer());
 		Document doc = pictoIndexer.createDocument(picto);
@@ -146,7 +129,7 @@ public class PictoIndexerTest {
 		Picto picto = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est").collect(Collectors.toSet()));
 
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		// We don't want to test the analyzer for this test
 		pictoIndexer.setAnalyzer(new StandardAnalyzer());
 		Document doc = pictoIndexer.createDocument(picto);
@@ -166,7 +149,7 @@ public class PictoIndexerTest {
 	void createDocument_ko_emptyTags() throws Exception {
 		Picto picto = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe", new HashSet<String>());
 
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		Document doc = pictoIndexer.createDocument(picto);
 
 		assertTrue(doc.getFields().isEmpty(), "The document should be empty.");
@@ -181,7 +164,7 @@ public class PictoIndexerTest {
 	void createDocument_ko_nullTags() throws Exception {
 		Picto picto = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe", null);
 
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		Document doc = pictoIndexer.createDocument(picto);
 
 		assertTrue(doc.getFields().isEmpty(), "The document should be empty.");
@@ -194,7 +177,7 @@ public class PictoIndexerTest {
 	 */
 	@Test
 	void createDocument_ko_nullPicto() throws Exception {
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		Document doc = pictoIndexer.createDocument(null);
 
 		assertTrue(doc.getFields().isEmpty(), "The document should be empty.");
@@ -208,8 +191,8 @@ public class PictoIndexerTest {
 	@Test
 	void search_ko_noIndex() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/lucene");
-
+		PictoIndexer pictoIndexer = new PictoIndexer();
+		pictoIndexer.setLuceneDirectory("./src/test/resources/luceneOk");
 		IndexNotFoundException thrown = assertThrows(IndexNotFoundException.class, () -> {
 			pictoIndexer.search("test", PictoIndexer.FIELD_ID, 12);
 		});
@@ -225,7 +208,7 @@ public class PictoIndexerTest {
 	@Test
 	void search_ok_indexEmpty() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.indexObjects(new ArrayList<>());
 		List<Document> docs = pictoIndexer.search("test", PictoIndexer.FIELD_ID, 12);
 
@@ -240,7 +223,7 @@ public class PictoIndexerTest {
 	@Test
 	void search_ok_onlyOnePicto() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
@@ -262,7 +245,7 @@ public class PictoIndexerTest {
 	@Test
 	void search_ok_severalPictos() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto1 = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "contrats").collect(Collectors.toSet()));
@@ -287,7 +270,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_tagsEmpty() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe", new HashSet<>());
 		pictoIndexer.indexObject(picto);
@@ -305,7 +288,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_nullId() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto = initPicto(null, "Loupe.jpg", "Une loupe", new HashSet<>());
 		pictoIndexer.indexObject(picto);
@@ -323,7 +306,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObject_ko_nullPicto() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		pictoIndexer.indexObject(null);
 
@@ -340,7 +323,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObjects_ok_withOnePictoko() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto1 = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "contrats").collect(Collectors.toSet()));
@@ -365,7 +348,7 @@ public class PictoIndexerTest {
 	@Test
 	void indexObjects_ok_hits() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		Picto picto1 = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "contrats").collect(Collectors.toSet()));
 		Picto picto2 = initPicto(Long.valueOf(5), "Parchemin.jpg", "Un parchemin",
@@ -389,7 +372,7 @@ public class PictoIndexerTest {
 	@Test
 	void updateObject_ok() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto1 = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "contrats").collect(Collectors.toSet()));
@@ -421,7 +404,7 @@ public class PictoIndexerTest {
 	@Test
 	void updateObject_ko_noTags() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto1 = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "contrats").collect(Collectors.toSet()));
@@ -452,7 +435,7 @@ public class PictoIndexerTest {
 	@Test
 	void updateObject_ko_nullPicto() throws Exception {
 		// init
-		PictoIndexer pictoIndexer = new PictoIndexer("./src/test/resources/luceneOk");
+		PictoIndexer pictoIndexer = new PictoIndexer();
 		pictoIndexer.deleteIndex();
 		Picto picto1 = initPicto(Long.valueOf(2), "Loupe.jpg", "Une loupe",
 				Stream.of("c'est", "loupe", "détail", "chercher", "analyser", "contrats").collect(Collectors.toSet()));
