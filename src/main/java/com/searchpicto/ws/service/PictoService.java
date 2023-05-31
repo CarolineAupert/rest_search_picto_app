@@ -66,4 +66,12 @@ public interface PictoService {
 	 */
 	List<Picto> getLastPictosAdded(int sizeLimit);
 
+	/**
+	 * Updates the index with all pictos.
+	 * 
+	 * @throws PictoIndexingException The exception thrown if the indexing goes
+	 *                                wrong.
+	 */
+	void indexAllPictos() throws PictoIndexingException;
+
 }

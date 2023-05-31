@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -257,7 +258,7 @@ class PictoServiceTest {
 	void addNewPicto_pictoWithTags_indexerException() throws Exception {
 		Picto picto = initPicto("Loupe.jpg", "Une loupe",
 				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
-		
+
 		Picto pictoSaved = new Picto();
 		Mockito.when(pictoRepositoryMock.save(picto)).thenReturn(pictoSaved);
 		Mockito.doThrow(new IOException("Picto Indexer Exception")).when(pictoIndexerMock).indexObject(pictoSaved);
@@ -513,6 +514,70 @@ class PictoServiceTest {
 		assertEquals(pictos.size(), 2, "One picto should be found.");
 		assertTrue(pictos.contains(picto1), "The correspondong picto should be found.");
 		assertTrue(pictos.contains(picto2), "The correspondong picto should be found.");
+	}
+
+	/**
+	 * Tests the method indexAllPictos with several pictos.
+	 */
+	@Test
+	void indexAllPictos_severalPictos() throws Exception {
+		// Init
+		var pictos = new ArrayList<Picto>();
+		pictos.add(initPicto("Loupe.jpg", "Une loupe",
+				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet())));
+		pictos.add(initPicto("Parchemin.jpg", "Un parchemin",
+				Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet())));
+		pictos.add(initPicto("Truc.jpg", "Un truc",
+				Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet())));
+		pictos.add(initPicto("Perso.jpg", "Un perso",
+				Stream.of("parchemin", "détail", "contrat", "législation").collect(Collectors.toSet())));
+
+		Mockito.when(pictoRepositoryMock.findAll()).thenReturn(pictos);
+
+		pictoService.indexAllPictos();
+
+		Mockito.verify(pictoIndexerMock).indexObjects(pictos);
+	}
+
+	/**
+	 * Tests the method indexAllPictos with one picto.
+	 */
+	@Test
+	void indexAllPictos_onePicto() throws Exception {
+		// Init
+		var pictos = new ArrayList<Picto>();
+		pictos.add(initPicto("Loupe.jpg", "Une loupe",
+				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet())));
+
+		Mockito.when(pictoRepositoryMock.findAll()).thenReturn(pictos);
+
+		pictoService.indexAllPictos();
+
+		Mockito.verify(pictoIndexerMock).indexObjects(pictos);
+	}
+
+	/**
+	 * Tests the method indexAllPictos without pictos.
+	 */
+	@Test
+	void indexAllPictos_noPicto() throws Exception {
+		Mockito.when(pictoRepositoryMock.findAll()).thenReturn(new ArrayList<Picto>());
+
+		pictoService.indexAllPictos();
+
+		Mockito.verify(pictoIndexerMock, never()).indexObjects(anyList());
+	}
+
+	/**
+	 * Tests the method indexAllPictos without pictos.
+	 */
+	@Test
+	void indexAllPictos_nullPicto() throws Exception {
+		Mockito.when(pictoRepositoryMock.findAll()).thenReturn(null);
+
+		pictoService.indexAllPictos();
+
+		Mockito.verify(pictoIndexerMock, never()).indexObjects(anyList());
 	}
 
 }

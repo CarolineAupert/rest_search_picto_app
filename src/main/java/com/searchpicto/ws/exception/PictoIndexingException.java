@@ -21,6 +21,14 @@ public class PictoIndexingException extends Exception {
 
 	/**
 	 * Constructor.
+	 * @param cause The detail of the exception thrown.
+	 */
+	public PictoIndexingException(Throwable cause) {
+		super("Error while indexing pictos : ", cause);
+	}
+	
+	/**
+	 * Constructor.
 	 * @param query The query.
 	 * @param cause The detail of the exception thrown.
 	 */
