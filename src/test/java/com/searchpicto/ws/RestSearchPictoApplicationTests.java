@@ -56,7 +56,7 @@ class RestSearchPictoApplicationTests {
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 * @throws IOException
-	 * @throws PictoIndexingException 
+	 * @throws PictoIndexingException
 	 */
 	private Picto initPicto(String location, String title, Set<String> tags, LocalDateTime creationDate)
 			throws IOException, PictoIndexingException {
@@ -72,15 +72,14 @@ class RestSearchPictoApplicationTests {
 	 * Init database for tests
 	 * 
 	 * @throws IOException
-	 * @throws PictoIndexingException 
+	 * @throws PictoIndexingException
 	 */
 	@BeforeAll
 	void initData() throws PictoIndexingException, IOException {
 		initPicto("Parchemin.jpg", "Un parchemin",
 				Stream.of("parchemin", "détail", "contrat", "legislation", "machin").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 05, 24, 18, 00));
-		initPicto("Truc.jpg", "Un truc",
-				Stream.of("encore", "allo", "Contrat", "Machines").collect(Collectors.toSet()),
+		initPicto("Truc.jpg", "Un truc", Stream.of("encore", "allo", "Contrat", "Machines").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 04, 24, 18, 10));
 		initPicto("Picto.jpg", "Un truc",
 				Stream.of("encore", "allo", "contrats", "une législation").collect(Collectors.toSet()),
@@ -140,7 +139,7 @@ class RestSearchPictoApplicationTests {
 				.andExpect(content().string(containsString("Parchemin.jpg")))
 				.andExpect(content().string(containsString("Truc.jpg")));
 	}
-	
+
 	/**
 	 * Tests findPictosByTag method when pictos are found with a complex query.
 	 */
@@ -152,7 +151,7 @@ class RestSearchPictoApplicationTests {
 				.andExpect(content().string(containsString("Picto.jpg")))
 				.andExpect(content().string(containsString("Perso.jpg")));
 	}
-	
+
 	/**
 	 * Tests findPictosByTag method when no picto found.
 	 */
@@ -209,5 +208,19 @@ class RestSearchPictoApplicationTests {
 
 		this.mockMvc.perform(get("/pictos?last=" + sizeLimit)).andDo(print()).andExpect(status().isOk())
 				.andExpect(content().string(containsString("")));
+	}
+
+	/**
+	 * Tests indexAllPictos method.
+	 */
+	@Test
+	void indexAllPictos() throws Exception {
+		this.deleteIndex();
+		pictoService.indexAllPictos();
+		this.mockMvc.perform(get("/pictos?query=contrat")).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString("Parchemin.jpg")))
+				.andExpect(content().string(containsString("Picto.jpg")))
+				.andExpect(content().string(containsString("Truc.jpg")))
+				.andExpect(content().string(containsString("Perso.jpg")));
 	}
 }

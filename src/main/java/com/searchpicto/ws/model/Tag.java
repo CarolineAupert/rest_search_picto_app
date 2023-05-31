@@ -21,7 +21,6 @@ import jakarta.persistence.Table;
 @Table(name = "TAGS")
 public class Tag {
 
-	// TODO voir length
 	/**
 	 * The id, defined by the tag value itself.
 	 */
