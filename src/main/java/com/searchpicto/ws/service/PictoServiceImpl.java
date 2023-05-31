@@ -83,7 +83,7 @@ public class PictoServiceImpl implements PictoService {
 					}
 				}
 			} catch (IOException | ParseException e) {
-				String.format("Error while accessing the index for the query \"%s\" : %s", query, e);
+				logger.error(String.format("Error while accessing the index for the query \"%s\" : %s", query, e));
 				throw new PictoIndexingException(query, e);
 			}
 
@@ -99,7 +99,8 @@ public class PictoServiceImpl implements PictoService {
 			try {
 				pictoIndexer.indexObject(pictoCreated);
 			} catch (IOException e) {
-				String.format("Error while indexing the picto with id \"%d\" : %s", pictoCreated.getPictoId(), e);
+				logger.error(String.format("Error while indexing the picto with id \"%d\" : %s",
+						pictoCreated.getPictoId(), e));
 				throw new PictoIndexingException(pictoCreated.getPictoId(), e);
 			}
 		}
@@ -122,7 +123,8 @@ public class PictoServiceImpl implements PictoService {
 				// Update index
 				pictoIndexer.updateObjectIndex(picto);
 			} catch (IOException e) {
-				String.format("Error while updating the index of the picto with id \"%d\" : %s", picto.getPictoId(), e);
+				logger.error(String.format("Error while updating the index of the picto with id \"%d\" : %s",
+						picto.getPictoId(), e));
 				throw new PictoIndexingException(picto.getPictoId(), e);
 			}
 		}
@@ -139,6 +141,26 @@ public class PictoServiceImpl implements PictoService {
 			}
 		}
 		return new ArrayList<>();
+	}
+
+	@Override
+	public void indexAllPictos() throws PictoIndexingException {
+		var pictosIterable = pictoRepository.findAll();
+
+		var pictos = new ArrayList<Picto>();
+		if (pictosIterable != null) {
+			pictosIterable.forEach(pictos::add);
+		}
+
+		if (!pictos.isEmpty()) {
+			try {
+				pictoIndexer.indexObjects(pictos);
+			} catch (IOException e) {
+				logger.error(String.format("Error while indexing all pictos : %s", e));
+				throw new PictoIndexingException(e);
+			}
+		}
+
 	}
 
 }
