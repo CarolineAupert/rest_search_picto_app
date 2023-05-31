@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.searchpicto.ws.RestSearchPictoApplication;
 import com.searchpicto.ws.dto.PictoDto;
 import com.searchpicto.ws.exception.PictoIndexingException;
 import com.searchpicto.ws.exception.PictoNotFoundException;
@@ -59,7 +58,7 @@ public class PictoControllerImpl implements PictoController {
 		if (picto.isPresent()) {
 			return pictoMapper.pictoToPictoDto(picto.get());
 		} else {
-			logger.warn(String.format("PictoNotFoundException thrown for the id %l", id));
+			logger.warn(String.format("PictoNotFoundException thrown for the id %d", id));
 			throw new PictoNotFoundException(id);
 		}
 	}
