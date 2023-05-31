@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +26,11 @@ import com.searchpicto.ws.service.PictoService;
 @RestController
 public class PictoControllerImpl implements PictoController {
 
+	/**
+	 * The logger.
+	 */
+	Logger logger = LoggerFactory.getLogger(PictoControllerImpl.class);
+	
 	/**
 	 * The Service associated to pictos.
 	 */
@@ -51,6 +58,7 @@ public class PictoControllerImpl implements PictoController {
 		if (picto.isPresent()) {
 			return pictoMapper.pictoToPictoDto(picto.get());
 		} else {
+			logger.warn(String.format("PictoNotFoundException thrown for the id %d", id));
 			throw new PictoNotFoundException(id);
 		}
 	}

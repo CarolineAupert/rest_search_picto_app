@@ -224,11 +224,13 @@ class PictoServiceTest {
 	void addNewPicto_pictoNoTags_save() throws Exception {
 		Picto picto = new Picto();
 		picto.setTags(new HashSet<>());
+		Picto pictoSaved = new Picto();
+
+		Mockito.when(pictoRepositoryMock.save(picto)).thenReturn(pictoSaved);
 		pictoService.addNewPicto(picto);
 
 		verify(tagRepositoryMock, never()).save(any());
-		verify(pictoRepositoryMock).save(picto);
-		verify(pictoIndexerMock).indexObject(picto);
+		verify(pictoIndexerMock).indexObject(pictoSaved);
 	}
 
 	/**
@@ -238,11 +240,13 @@ class PictoServiceTest {
 	void addNewPicto_pictoWithTags_save() throws Exception {
 		Picto picto = initPicto("Loupe.jpg", "Une loupe",
 				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
+		Picto pictoSaved = new Picto();
+
+		Mockito.when(pictoRepositoryMock.save(picto)).thenReturn(pictoSaved);
 		pictoService.addNewPicto(picto);
 
 		verify(tagRepositoryMock, times(5)).save(any());
-		verify(pictoRepositoryMock).save(picto);
-		verify(pictoIndexerMock).indexObject(picto);
+		verify(pictoIndexerMock).indexObject(pictoSaved);
 
 	}
 
@@ -253,17 +257,18 @@ class PictoServiceTest {
 	void addNewPicto_pictoWithTags_indexerException() throws Exception {
 		Picto picto = initPicto("Loupe.jpg", "Une loupe",
 				Stream.of("loupe", "détail", "chercher", "analyser", "zoom").collect(Collectors.toSet()));
-		Mockito.doThrow(new IOException("Picto Indexer Exception")).when(pictoIndexerMock).indexObject(picto);
-
-		IOException thrown = assertThrows(IOException.class, () -> {
+		
+		Picto pictoSaved = new Picto();
+		Mockito.when(pictoRepositoryMock.save(picto)).thenReturn(pictoSaved);
+		Mockito.doThrow(new IOException("Picto Indexer Exception")).when(pictoIndexerMock).indexObject(pictoSaved);
+		PictoIndexingException thrown = assertThrows(PictoIndexingException.class, () -> {
 			pictoService.addNewPicto(picto);
 		});
 
 		verify(tagRepositoryMock, times(5)).save(any());
-		verify(pictoRepositoryMock).save(picto);
-		verify(pictoIndexerMock).indexObject(picto);
+		verify(pictoIndexerMock).indexObject(pictoSaved);
 
-		assertTrue(thrown.getMessage().contains("Picto Indexer Exception"));
+		assertTrue(thrown.getMessage().contains("Error while indexing the picto with the id : "));
 	}
 
 	/**
@@ -356,11 +361,11 @@ class PictoServiceTest {
 		// Initiating data to verify
 		Mockito.doThrow(new IOException("Picto Indexer Exception")).when(pictoIndexerMock).updateObjectIndex(any());
 
-		IOException thrown = assertThrows(IOException.class, () -> {
+		PictoIndexingException thrown = assertThrows(PictoIndexingException.class, () -> {
 			pictoService.addPictoTags(initialPicto, tagNamesToAdd);
 		});
 
-		assertTrue(thrown.getMessage().contains("Picto Indexer Exception"));
+		assertTrue(thrown.getMessage().contains("Error while indexing the picto with the id : "));
 
 	}
 

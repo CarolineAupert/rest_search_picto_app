@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,11 @@ import com.searchpicto.ws.search.PictoIndexer;
  */
 @Service
 public class PictoServiceImpl implements PictoService {
+
+	/**
+	 * The logger.
+	 */
+	Logger logger = LoggerFactory.getLogger(PictoServiceImpl.class);
 
 	/**
 	 * Tag repository.
@@ -76,8 +83,8 @@ public class PictoServiceImpl implements PictoService {
 					}
 				}
 			} catch (IOException | ParseException e) {
+				String.format("Error while accessing the index for the query \"%s\" : %s", query, e);
 				throw new PictoIndexingException(query, e);
-				// TODO add log
 			}
 
 		}
@@ -85,16 +92,21 @@ public class PictoServiceImpl implements PictoService {
 	}
 
 	@Override
-	public void addNewPicto(Picto picto) throws IOException {
+	public void addNewPicto(Picto picto) throws PictoIndexingException {
 		if (picto != null && picto.getTags() != null) {
 			picto.getTags().forEach(tag -> tagRepository.save(tag));
-			pictoRepository.save(picto);
-			pictoIndexer.indexObject(picto);
+			Picto pictoCreated = pictoRepository.save(picto);
+			try {
+				pictoIndexer.indexObject(pictoCreated);
+			} catch (IOException e) {
+				String.format("Error while indexing the picto with id \"%d\" : %s", pictoCreated.getPictoId(), e);
+				throw new PictoIndexingException(pictoCreated.getPictoId(), e);
+			}
 		}
 	}
 
 	@Override
-	public Picto addPictoTags(Picto picto, Set<String> newTags) throws IOException {
+	public Picto addPictoTags(Picto picto, Set<String> newTags) throws PictoIndexingException {
 		// See if this is in one session.
 		if (picto != null && newTags != null && !newTags.isEmpty()) {
 			// Save tags
@@ -105,9 +117,14 @@ public class PictoServiceImpl implements PictoService {
 			picto.addTags(tagsToAdd);
 			pictoRepository.save(picto);
 
-			// TODO : si exception alors le logger pour pouvoir s'en occuper plus tard !
-			// Update index
-			pictoIndexer.updateObjectIndex(picto);
+			try {
+				// TODO : si exception alors le logger pour pouvoir s'en occuper plus tard !
+				// Update index
+				pictoIndexer.updateObjectIndex(picto);
+			} catch (IOException e) {
+				String.format("Error while updating the index of the picto with id \"%d\" : %s", picto.getPictoId(), e);
+				throw new PictoIndexingException(picto.getPictoId(), e);
+			}
 		}
 		return picto;
 	}

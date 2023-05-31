@@ -21,11 +21,20 @@ public class PictoIndexingException extends Exception {
 
 	/**
 	 * Constructor.
-	 * @param id The picto id.
+	 * @param query The query.
 	 * @param cause The detail of the exception thrown.
 	 */
 	public PictoIndexingException(String query, Throwable cause) {
 		super("Error while looking for the picto with the query : " + query, cause);
+	}
+	
+	/**
+	 * Constructor.
+	 * @param id The picto id.
+	 * @param cause The detail of the exception thrown.
+	 */
+	public PictoIndexingException(Long pictoId, Throwable cause) {
+		super("Error while indexing the picto with the id : " + pictoId, cause);
 	}
 
 }

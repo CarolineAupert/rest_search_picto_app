@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,16 +23,23 @@ import com.searchpicto.ws.service.PictoService;
 @SpringBootApplication
 public class RestSearchPictoApplication {
 
+	/**
+	 * The logger.
+	 */
+	Logger logger = LoggerFactory.getLogger(RestSearchPictoApplication.class);
+	
 	public static void main(String[] args) {
 		SpringApplication.run(RestSearchPictoApplication.class, args);
 	}
-
+	
 	@Autowired
 	private Environment environment;
 
 	// Will be removed
 	@Bean
 	CommandLineRunner demo(PictoService pictoService) {
+		logger.info(String.format("Application runs in %s environment.",Arrays.stream(environment.getActiveProfiles()).toString()));
+		
 		return args -> {
 			if (!Arrays.asList(environment.getActiveProfiles()).contains("test")) {
 

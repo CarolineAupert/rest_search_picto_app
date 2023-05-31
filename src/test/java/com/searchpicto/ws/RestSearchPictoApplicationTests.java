@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.searchpicto.ws.exception.PictoIndexingException;
 import com.searchpicto.ws.model.Media;
 import com.searchpicto.ws.model.Picto;
 import com.searchpicto.ws.model.Tag;
@@ -55,9 +56,10 @@ class RestSearchPictoApplicationTests {
 	 * @param tags     The Picto Tags.
 	 * @return The created Picto.
 	 * @throws IOException
+	 * @throws PictoIndexingException 
 	 */
 	private Picto initPicto(String location, String title, Set<String> tags, LocalDateTime creationDate)
-			throws IOException {
+			throws IOException, PictoIndexingException {
 		Picto picto = new Picto();
 		picto.setMedia(new Media(location, title));
 		picto.setTags(tags.stream().map(tag -> new Tag(tag)).collect(Collectors.toSet()));
@@ -70,9 +72,10 @@ class RestSearchPictoApplicationTests {
 	 * Init database for tests
 	 * 
 	 * @throws IOException
+	 * @throws PictoIndexingException 
 	 */
 	@BeforeAll
-	void initData() throws IOException {
+	void initData() throws PictoIndexingException, IOException {
 		initPicto("Parchemin.jpg", "Un parchemin",
 				Stream.of("parchemin", "détail", "contrat", "legislation", "machin").collect(Collectors.toSet()),
 				LocalDateTime.of(2023, 05, 24, 18, 00));
