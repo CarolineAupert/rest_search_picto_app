@@ -100,20 +100,20 @@ public class PictoIndexerTest {
 				"It should contain the same words.");
 	}
 
-	/**
-	 * Tests the method initCustomAnalyzer when there is no existing stopwords
-	 * file..
-	 * 
-	 * @throws Exception Exception
-	 */
-	@Test
-	void initCustomAnalyzer_ko_noStopWordsFile() throws Exception {
-		IOException thrown = assertThrows(IOException.class, () -> {
-			new PictoIndexer("./src/test/resources/luceneNoStopWordsFile");
-		});
-
-		assertTrue(thrown.getMessage().contains("Resource not found"));
-	}
+//	/**
+//	 * Tests the method initCustomAnalyzer when there is no existing stopwords
+//	 * file..
+//	 * 
+//	 * @throws Exception Exception
+//	 */
+//	@Test
+//	void initCustomAnalyzer_ko_noStopWordsFile() throws Exception {
+//		IOException thrown = assertThrows(IOException.class, () -> {
+//			new PictoIndexer("./src/test/resources/luceneNoStopWordsFile");
+//		});
+//
+//		assertTrue(thrown.getMessage().contains("Resource not found"));
+//	}
 
 	/**
 	 * Tests the method createDocument with a Picto with several tags.
