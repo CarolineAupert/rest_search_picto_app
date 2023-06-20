@@ -62,21 +62,21 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-		
+
     - name: Fill in the new image ID in the Amazon dockerrun file
-       id: dockerrun-setup
-       uses: danielr1996/envsubst-action@1.0.0
-	   env:
-		IMAGE_NAME: ${{ steps.build-image.outputs.image }}
-       with:
-		input: .aws/Dockerrun.template.json
-		output: Dockerrun.aws.json
-	
-	- name: Upload file to S3 bucket
-       run: aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
+      id: dockerrun-setup
+      uses: danielr1996/envsubst-action@1.0.0
+      env:
+        IMAGE_NAME: ${{ steps.build-image.outputs.image }}
+      with:
+        input: .aws/Dockerrun.template.json
+        output: Dockerrun.aws.json
+
+    - name: Upload file to S3 bucket
+      run: aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
 
 #	TODO generate deploy
-	
+
         
 #     - name: Fill in the new image ID in the Amazon ECS task definition
 #       id: task-def
