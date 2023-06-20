@@ -14,6 +14,9 @@ env:
   AWS_REGION: eu-west-3                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: caukaro           # set this to your Amazon ECR repository name
   AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }} # The bucket to deploy the app
+  APPLICATION_NAME: ${{ secrets.AWS_APPLICATION_NAME }}
+  ENVIRONMENT_NAME: ${{ secrets.AWS_ENVIRONMENT_NAME }}
+  VERSION_TAG: ${{ github.sha }}
 
 jobs:
   deploy:
@@ -57,11 +60,10 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION_TAG }} .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION_TAG }}
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION_TAG }}" >> $GITHUB_OUTPUT
 
     - name: Fill in the new image ID in the Amazon dockerrun file
       id: dockerrun-setup
@@ -75,21 +77,13 @@ jobs:
     - name: Upload file to S3 bucket
       run: aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
 
-#	TODO generate deploy
-
-        
-#     - name: Fill in the new image ID in the Amazon ECS task definition
-#       id: task-def
-#       uses: aws-actions/amazon-ecs-render-task-definition@v1
-#       with:
-#         task-definition: ${{ env.ECS_TASK_DEFINITION }}
-#         container-name: ${{ env.CONTAINER_NAME }}
-#         image: ${{ steps.build-image.outputs.image }}
-
-#     - name: Deploy Amazon ECS task definition
-#       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#       with:
-#         task-definition: ${{ steps.task-def.outputs.task-definition }}
-#        service: ${{ env.ECS_SERVICE }}
-#         cluster: ${{ env.ECS_CLUSTER }}
-#        wait-for-service-stability: true
+    - name: Deploy new ElasticBeanstalk Application Version
+      run: aws elasticbeanstalk update-environment --environment-name ${{ env.ENVIRONMENT_NAME }} --version-label "ver-${{ env.VERSION_TAG }}"
+      uses: einaregilsson/beanstalk-deploy@v21
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: ${{ env.APPLICATION_NAME }}
+        environment_name: ${{ env.ENVIRONMENT_NAME }}
+        version_label: ${{ env.VERSION_TAG }}
+        region: ${{ env.AWS_REGION }}
