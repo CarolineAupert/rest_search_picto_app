@@ -17,6 +17,7 @@ env:
   APPLICATION_NAME: ${{ secrets.AWS_APPLICATION_NAME }}
   ENVIRONMENT_NAME: ${{ secrets.AWS_ENVIRONMENT_NAME }}
   VERSION_TAG: ${{ github.sha }}
+  ZIP_FILE: picto-sketchnote-v${{ env.VERSION_TAG }}.zip
 
 jobs:
   deploy:
@@ -75,7 +76,9 @@ jobs:
         output: Dockerrun.aws.json
 
     - name: Upload file to S3 bucket
-      run: aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
+      run: |
+       aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
+       zip -r ${{ env.ZIP_FILE }} Dockerrun.aws.json
 
     - name: Deploy new ElasticBeanstalk Application Version
       uses: einaregilsson/beanstalk-deploy@v21
@@ -85,4 +88,6 @@ jobs:
         application_name: ${{ env.APPLICATION_NAME }}
         environment_name: ${{ env.ENVIRONMENT_NAME }}
         version_label: ${{ env.VERSION_TAG }}
+        version_description : ${{ github.sha }}
         region: ${{ env.AWS_REGION }}
+        deployment_package: ${{ env.ZIP_FILE }} 
