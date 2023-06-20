@@ -78,7 +78,6 @@ jobs:
       run: aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
 
     - name: Deploy new ElasticBeanstalk Application Version
-      run: aws elasticbeanstalk update-environment --environment-name ${{ env.ENVIRONMENT_NAME }} --version-label "ver-${{ env.VERSION_TAG }}"
       uses: einaregilsson/beanstalk-deploy@v21
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
