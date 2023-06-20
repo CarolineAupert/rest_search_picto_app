@@ -75,10 +75,10 @@ jobs:
         input: .aws/Dockerrun.template.json
         output: Dockerrun.aws.json
 
-    - name: Upload file to S3 bucket
+    - name: Upload zip file to S3 bucket
       run: |
-       aws s3 cp Dockerrun.aws.json s3://${{ env.AWS_S3_BUCKET }}
        zip -r ${{ env.ZIP_FILE }} Dockerrun.aws.json
+       # aws s3 cp ${{ env.ZIP_FILE }} s3://${{ env.AWS_S3_BUCKET }}
 
     - name: Deploy new ElasticBeanstalk Application Version
       uses: einaregilsson/beanstalk-deploy@v21
@@ -90,4 +90,5 @@ jobs:
         version_label: ${{ env.VERSION_TAG }}
         version_description : ${{ github.sha }}
         region: ${{ env.AWS_REGION }}
-        deployment_package: ${{ env.ZIP_FILE }} 
+        deployment_package: ${{ env.ZIP_FILE }}
+        existing_bucket_name: ${{ env.AWS_S3_BUCKET }}
