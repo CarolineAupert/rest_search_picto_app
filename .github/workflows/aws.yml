@@ -17,7 +17,7 @@ env:
   APPLICATION_NAME: ${{ secrets.AWS_APPLICATION_NAME }}
   ENVIRONMENT_NAME: ${{ secrets.AWS_ENVIRONMENT_NAME }}
   VERSION_TAG: ${{ github.sha }}
-  ZIP_FILE: picto-sketchnote-v${{ env.VERSION_TAG }}.zip
+  ZIP_FILE: picto-sketchnote-v${{ github.sha }}.zip
 
 jobs:
   deploy:
